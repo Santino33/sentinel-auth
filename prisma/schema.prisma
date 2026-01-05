@@ -1,0 +1,90 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model admin_keys {
+  id          String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  key         String   @unique @db.VarChar(255)
+  description String?
+  is_active   Boolean? @default(true)
+  created_at  DateTime @default(now()) @db.Timestamp(6)
+}
+
+model password_reset_codes {
+  id         String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  user_id    String   @db.Uuid
+  code       String   @db.VarChar(10)
+  expires_at DateTime @db.Timestamp(6)
+  used       Boolean? @default(false)
+  created_at DateTime @default(now()) @db.Timestamp(6)
+  users      users    @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_password_reset_user")
+
+  @@index([user_id], map: "idx_password_reset_user_id")
+}
+
+model projects {
+  id         String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  name       String    @db.VarChar(100)
+  api_key    String    @unique @db.VarChar(255)
+  is_active  Boolean?  @default(true)
+  created_at DateTime  @default(now()) @db.Timestamp(6)
+  updated_at DateTime? @db.Timestamp(6)
+  roles      roles[]
+  users      users[]
+}
+
+model refresh_tokens {
+  id         String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  user_id    String   @db.Uuid
+  token      String   @unique @db.VarChar(255)
+  expires_at DateTime @db.Timestamp(6)
+  revoked    Boolean? @default(false)
+  created_at DateTime @default(now()) @db.Timestamp(6)
+  users      users    @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_refresh_token_user")
+
+  @@index([user_id], map: "idx_refresh_tokens_user_id")
+}
+
+model roles {
+  id         String       @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  project_id String       @db.Uuid
+  name       String       @db.VarChar(50)
+  projects   projects     @relation(fields: [project_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_roles_project")
+  user_roles user_roles[]
+
+  @@unique([project_id, name], map: "uq_role_name_per_project")
+  @@index([project_id], map: "idx_roles_project_id")
+}
+
+model user_roles {
+  user_id String @db.Uuid
+  role_id String @db.Uuid
+  roles   roles  @relation(fields: [role_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_user_roles_role")
+  users   users  @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_user_roles_user")
+
+  @@id([user_id, role_id])
+}
+
+model users {
+  id                   String                 @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  project_id           String                 @db.Uuid
+  username             String                 @db.VarChar(100)
+  email                String?                @db.VarChar(150)
+  password_hash        String                 @db.VarChar(255)
+  salt                 String                 @db.VarChar(255)
+  is_active            Boolean?               @default(true)
+  created_at           DateTime               @default(now()) @db.Timestamp(6)
+  updated_at           DateTime?              @db.Timestamp(6)
+  password_reset_codes password_reset_codes[]
+  refresh_tokens       refresh_tokens[]
+  user_roles           user_roles[]
+  projects             projects               @relation(fields: [project_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_users_project")
+
+  @@unique([project_id, email], map: "uq_user_email_per_project")
+  @@unique([project_id, username], map: "uq_user_username_per_project")
+  @@index([project_id], map: "idx_users_project_id")
+}
