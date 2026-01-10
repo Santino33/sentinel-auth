@@ -1,4 +1,4 @@
-import { AdminKeyService } from "../services/adminKey.service";
+import { AdminKeyService } from "./adminKey.service";
 import { Request, Response } from "express";
 
 export class AdminController{

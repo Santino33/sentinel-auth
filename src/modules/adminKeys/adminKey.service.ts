@@ -1,5 +1,5 @@
-import { generateKey, generateHash, verifyKey } from "../utils/keyGenerator";
-import { AdminKeyRepository, CreateAdminKeyData } from "../repositories/adminKey.repository";
+import { generateKey, generateHash, verifyKey } from "../../utils/keyGenerator";
+import { AdminKeyRepository, CreateAdminKeyData } from "./adminKey.repository";
 
 export class AdminKeyService {
   constructor(private repo: AdminKeyRepository) {}

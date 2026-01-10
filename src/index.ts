@@ -1,6 +1,6 @@
 import express from "express";
 import dotenv from "dotenv";
-import adminRouter from "./router/admin";
+import adminRouter from "./modules/adminKeys/adminKey.router";
 
 dotenv.config();
 
