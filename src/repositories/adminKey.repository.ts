@@ -12,13 +12,21 @@ export class AdminKeyRepository {
         const adminKey = await prisma.admin_keys.create({
             data: adminKeyData,
         });
-        this.logger.info("AdminKeyRepository", "createAdminKey", "Admin key created successfully");
+        if (!adminKey) {
+            this.logger.warn("AdminKeyRepository", "createAdminKey", `No admin key created for the provided value`);
+        } else {
+            this.logger.info("AdminKeyRepository", "createAdminKey", "Admin key created successfully");
+        }
         return adminKey;
     }
 
     async getAdminKeys() {
         const adminKeys = await prisma.admin_keys.findMany();
-        this.logger.info("AdminKeyRepository", "getAdminKeys", "Admin keys retrieved successfully");
+        if (!adminKeys) {
+            this.logger.warn("AdminKeyRepository", "getAdminKeys", `No admin keys found for the provided value`);
+        } else {
+            this.logger.info("AdminKeyRepository", "getAdminKeys", "Admin keys retrieved successfully");
+        }
         return adminKeys;
     }
 
@@ -28,8 +36,24 @@ export class AdminKeyRepository {
                 id: id,
             },
         });
-        this.logger.info("AdminKeyRepository", "getAdminKeyById", "Admin key retrieved successfully");
+        if (!adminKey) {
+            this.logger.warn("AdminKeyRepository", "getAdminKeyById", `No admin key found for the provided value`);
+        } else {
+            this.logger.info("AdminKeyRepository", "getAdminKeyById", "Admin key retrieved successfully");
+        }
         return adminKey;
+    }
+
+    async getAdminKey(key: string) {
+        const adminKey = await prisma.admin_keys.findUnique({
+            where: { key: key },
+        });
+        if (!adminKey) {
+            this.logger.warn("AdminKeyRepository", "getAdminKey", `No admin key found for the provided value`);
+        } else {
+            this.logger.info("AdminKeyRepository", "getAdminKey", "Admin key retrieved successfully");
+        }
+    return adminKey;
     }
 
     async deleteAdminKey(id: string) {
@@ -38,7 +62,11 @@ export class AdminKeyRepository {
                 id: id,
             },
         });
-        this.logger.info("AdminKeyRepository", "deleteAdminKey", "Admin key deleted successfully");
+        if (!adminKey) {
+            this.logger.warn("AdminKeyRepository", "deleteAdminKey", `No admin key found for the provided value`);
+        } else {
+            this.logger.info("AdminKeyRepository", "deleteAdminKey", "Admin key deleted successfully");
+        }
         return adminKey;
     }
 
@@ -49,7 +77,11 @@ export class AdminKeyRepository {
             },
             data: adminKeyData,
         });
-        this.logger.info("AdminKeyRepository", "updateAdminKey", "Admin key updated successfully");
+        if (!adminKey) {
+            this.logger.warn("AdminKeyRepository", "updateAdminKey", `No admin key found for the provided value`);
+        } else {
+            this.logger.info("AdminKeyRepository", "updateAdminKey", "Admin key updated successfully");
+        }
         return adminKey;
     }
 }

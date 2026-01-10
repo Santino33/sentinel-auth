@@ -7,12 +7,23 @@ export class AdminKeyService {
   async createKey() {
     const adminKey = await generateKey();
     const hash = await generateHash(adminKey);
-    this.repo.createAdminKey({ key: hash, is_active: true });
-    return adminKey;
+    const createdKey = await this.repo.createAdminKey({ key: hash, is_active: true });
+    return {
+      id: createdKey.id,
+      key: adminKey
+    };
   }
 
   async updateAdminKey(id: string, adminKeyData: CreateAdminKeyData) {
     const adminKey = await this.repo.updateAdminKey(id, adminKeyData);
+    return adminKey;
+  }
+
+  async getAdminKeyByValue(key: string) {
+    const adminKey = await this.repo.getAdminKey(key);
+    if (!adminKey) {
+        throw new Error("Admin key not found");
+    }
     return adminKey;
   }
 
