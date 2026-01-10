@@ -4,6 +4,7 @@ import {Logger} from "../../utils/logger";
 export type CreateAdminKeyData = {
     key: string;
     is_active?: boolean;
+    is_bootstrap?: boolean;
 }
 
 export class AdminKeyRepository {
@@ -54,6 +55,16 @@ export class AdminKeyRepository {
             this.logger.info("AdminKeyRepository", "getAdminKey", "Admin key retrieved successfully");
         }
     return adminKey;
+    }
+
+    async getAdminKeysCount() {
+        const adminKeysCount = await prisma.admin_keys.count();
+        if (!adminKeysCount) {
+            this.logger.warn("AdminKeyRepository", "getAdminKeysCount", `No admin keys found for the provided value`);
+        } else {
+            this.logger.info("AdminKeyRepository", "getAdminKeysCount", "Admin keys count retrieved successfully");
+        }
+        return adminKeysCount;
     }
 
     async deleteAdminKey(id: string) {
