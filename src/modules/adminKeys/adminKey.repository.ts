@@ -1,5 +1,5 @@
-import { prisma } from "../lib/prisma";
-import {Logger} from "../utils/logger";
+import { prisma } from "../../lib/prisma";
+import {Logger} from "../../utils/logger";
 
 export type CreateAdminKeyData = {
     key: string;

@@ -1,8 +1,11 @@
 import express from "express";
 import dotenv from "dotenv";
 import adminRouter from "./modules/adminKeys/adminKey.router";
+import { bootstrap } from "./utils/bootstrap";
 
 dotenv.config();
+
+bootstrap();
 
 const app = express();
 const port = process.env.PORT || 3000;
