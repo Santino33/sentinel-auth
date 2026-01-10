@@ -21,6 +21,20 @@ services:
     networks:
       - sentinel-network
 
+  sentinel-back:
+    build: .
+    container_name: sentinel-back
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - DATABASE_URL=postgresql://postgres:root@postgres:5432/sentinel?schema=public
+      - PORT=3000
+    depends_on:
+      - postgres
+    networks:
+      - sentinel-network
+
 volumes:
   pg_data:
 
