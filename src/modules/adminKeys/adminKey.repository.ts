@@ -57,12 +57,16 @@ export class AdminKeyRepository {
     return adminKey;
     }
 
-    async getAdminKeysCount() {
-        const adminKeysCount = await prisma.admin_keys.count();
+    async getActiveAdminKeysCount() {
+        const adminKeysCount = await prisma.admin_keys.count({
+            where: {
+                is_active: true,
+            },
+        });
         if (!adminKeysCount) {
-            this.logger.warn("AdminKeyRepository", "getAdminKeysCount", `No admin keys found for the provided value`);
+            this.logger.warn("AdminKeyRepository", "getActiveAdminKeysCount", `No admin keys found for the provided value`);
         } else {
-            this.logger.info("AdminKeyRepository", "getAdminKeysCount", "Admin keys count retrieved successfully" + adminKeysCount);
+            this.logger.info("AdminKeyRepository", "getActiveAdminKeysCount", "Admin keys count retrieved successfully");
         }
         return adminKeysCount;
     }

@@ -9,7 +9,7 @@ export async function bootstrap() {
 }
 
 async function verifyInitialAdminKey() {
-    const adminKeyCount = await adminKeyRepository.getAdminKeysCount();    
+    const adminKeyCount = await adminKeyRepository.getActiveAdminKeysCount();    
     if (adminKeyCount === 0) {
         const adminKey = await createInitialAdminKey();
         console.log("========================================\n🚨 INITIAL ADMIN KEY GENERATED\nSAVE THIS KEY — IT WILL NOT BE SHOWN AGAIN\n\nADMIN_KEY=" + adminKey + "\n========================================");

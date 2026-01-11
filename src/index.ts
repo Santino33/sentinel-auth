@@ -2,6 +2,7 @@ import express from "express";
 import dotenv from "dotenv";
 import adminRouter from "./modules/adminKeys/adminKey.router";
 import { bootstrap } from "./utils/bootstrap";
+import { errorHandler } from "./middleware/errorHandler";
 
 dotenv.config();
 
@@ -20,6 +21,9 @@ const start = async () => {
 
     // Routes
     app.use("/api/admin", adminRouter);
+
+    // Global Error Handler
+    app.use(errorHandler);
 
     app.listen(port, () => {
         console.log(`🚀 Sentinel Backend running on port ${port}`);
