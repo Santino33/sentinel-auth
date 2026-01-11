@@ -62,7 +62,7 @@ export class AdminKeyRepository {
         if (!adminKeysCount) {
             this.logger.warn("AdminKeyRepository", "getAdminKeysCount", `No admin keys found for the provided value`);
         } else {
-            this.logger.info("AdminKeyRepository", "getAdminKeysCount", "Admin keys count retrieved successfully");
+            this.logger.info("AdminKeyRepository", "getAdminKeysCount", "Admin keys count retrieved successfully" + adminKeysCount);
         }
         return adminKeysCount;
     }
@@ -81,6 +81,31 @@ export class AdminKeyRepository {
         return adminKey;
     }
 
+    async disableBootstrapAdminKey() {
+        const bootstrapKey = await prisma.admin_keys.findFirst({
+            where: {
+                is_bootstrap: true,
+            },
+        });
+
+        if (!bootstrapKey) {
+            this.logger.warn("AdminKeyRepository", "disableBootstrapAdminKey", "No bootstrap key found");
+            return null;
+        }
+
+        const adminKey = await prisma.admin_keys.update({
+            where: {
+                id: bootstrapKey.id,
+            },
+            data: {
+                is_active: false,
+            },
+        });
+
+        this.logger.info("AdminKeyRepository", "disableBootstrapAdminKey", "Bootstrap admin key disabled successfully");
+        return adminKey;
+    }
+
     async updateAdminKey(id: string, adminKeyData: CreateAdminKeyData) {
         const adminKey = await prisma.admin_keys.update({
             where: {
@@ -96,3 +121,4 @@ export class AdminKeyRepository {
         return adminKey;
     }
 }
+

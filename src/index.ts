@@ -5,21 +5,28 @@ import { bootstrap } from "./utils/bootstrap";
 
 dotenv.config();
 
-bootstrap();
+const start = async () => {
+    await bootstrap();
 
-const app = express();
-const port = process.env.PORT || 3000;
+    const app = express();
+    const port = process.env.PORT || 3000;
 
-app.use(express.json());
+    app.use(express.json());
 
-// Health check
-app.get("/health", (req, res) => {
-  res.status(200).json({ status: "ok", timestamp: new Date().toISOString() });
-});
+    // Health check
+    app.get("/health", (req, res) => {
+        res.status(200).json({ status: "ok", timestamp: new Date().toISOString() });
+    });
 
-// Routes
-app.use("/api/admin", adminRouter);
+    // Routes
+    app.use("/api/admin", adminRouter);
 
-app.listen(port, () => {
-  console.log(`🚀 Sentinel Backend running on port ${port}`);
+    app.listen(port, () => {
+        console.log(`🚀 Sentinel Backend running on port ${port}`);
+    });
+};
+
+start().catch((err) => {
+    console.error("Fatal error during startup:", err);
+    process.exit(1);
 });
