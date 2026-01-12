@@ -1,13 +1,16 @@
-import { prisma } from "../lib/prisma";
+import { Logger } from "src/utils/logger";
+import { prisma } from "../../lib/prisma";
 
 
-type CreateProjectData = {
+export type CreateProjectData = {
     name: string;
     api_key: string;
     is_active?: boolean;
 }
 
 export class ProjectRepository {
+    constructor(private logger: Logger) {}
+
     async createProject(projectData: CreateProjectData) {
         const project = await prisma.projects.create({
             data: projectData,
@@ -17,13 +20,26 @@ export class ProjectRepository {
 
     async getProjects() {
         const projects = await prisma.projects.findMany();
-        return projects;
+        return projects.map(project => ({
+            id: project.id,
+            name: project.name,
+            is_active: project.is_active,
+            created_at: project.created_at,
+            updated_at: project.updated_at,
+        }));
     }
 
-    async getProjectById(id: string) {
+    async getProjectByApiKey(api_key: string) {
         const project = await prisma.projects.findUnique({
             where: {
-                id: id,
+                api_key: api_key,
+            },
+            select: {
+                id: true,
+                name: true,
+                is_active: true,
+                created_at: true,
+                updated_at: true,
             },
         });
         return project;
