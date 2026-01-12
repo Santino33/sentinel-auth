@@ -15,6 +15,12 @@ export type UpdateProjectData = {
     updated_at?: Date;
 }
 
+export type ProjectEntity = {
+    id: string;
+    name: string;
+    is_active: boolean;
+}
+
 export class ProjectRepository {
     constructor(private logger: Logger) {}
 
@@ -63,6 +69,27 @@ export class ProjectRepository {
             this.logger.warn("ProjectRepository", "getProjectByApiKey", `No project found for the provided API key`);
         } else {
             this.logger.info("ProjectRepository", "getProjectByApiKey", "Project retrieved successfully");
+        }
+        return project;
+    }
+
+    async getProjectById(id: string) {
+        const project = await prisma.projects.findUnique({
+            where: {
+                id: id,
+            },
+            select: {
+                id: true,
+                name: true,
+                is_active: true,
+                created_at: true,
+                updated_at: true,
+            },
+        });
+        if (!project) {
+            this.logger.warn("ProjectRepository", "getProjectById", `No project found for the provided ID`);
+        } else {
+            this.logger.info("ProjectRepository", "getProjectById", "Project retrieved successfully");
         }
         return project;
     }

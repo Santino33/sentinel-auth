@@ -7,6 +7,12 @@ export type CreateAdminKeyData = {
     is_bootstrap?: boolean;
 }
 
+export type AdminKeyEntity = {
+    id: string;
+    key: string;
+    is_active: boolean;
+}
+
 export class AdminKeyRepository {
     constructor(private logger: Logger) {}
     async createAdminKey(adminKeyData: CreateAdminKeyData) {
@@ -43,6 +49,23 @@ export class AdminKeyRepository {
             this.logger.info("AdminKeyRepository", "getAdminKeyById", "Admin key retrieved successfully");
         }
         return adminKey;
+    }
+
+    async getAdminKeybyKey(key: string) {
+        const adminKey = await prisma.admin_keys.findUnique({
+            where: { key: key },
+            select: {
+                id: true,
+                key: true,
+                is_active: true,
+            }
+        });
+        if (!adminKey) {
+            this.logger.warn("AdminKeyRepository", "getAdminKeybyKey", `No admin key found for the provided value`);
+        } else {
+            this.logger.info("AdminKeyRepository", "getAdminKeybyKey", "Admin key retrieved successfully");
+        }
+        return adminKey as AdminKeyEntity;
     }
 
     async getAdminKey(key: string) {

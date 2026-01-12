@@ -11,3 +11,9 @@ export class AdminKeyRequiredError extends BadRequestError {
     super(message, "ADMIN_KEY_REQUIRED");
   }
 }
+
+export class AdminKeyDisabledError extends BadRequestError {
+  constructor(message: string = "Admin key is disabled") {
+    super(message, "ADMIN_KEY_DISABLED");
+  }
+}

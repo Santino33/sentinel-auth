@@ -5,7 +5,7 @@ export class ProjectController {
     constructor(private projectService: ProjectService) {}
 
     async createProject(req: Request, res: Response) {
-        const project = await this.projectService.createProject(req.body);
+        const project = await this.projectService.createProject(req.body, req.params.admin_key);
         return res.status(201).json(project);
     }
 

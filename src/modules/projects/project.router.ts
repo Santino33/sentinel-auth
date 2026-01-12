@@ -4,11 +4,13 @@ import { asyncHandler } from "../../utils/asyncHandler";
 import { ProjectRepository } from "./project.repository";
 import { ProjectService } from "./project.service";
 import { ProjectController } from "./project.controller";
+import { AdminKeyRepository } from "../adminKeys/adminKey.repository";
 
 const router = Router();
 
 const projectRepository = new ProjectRepository(logger);
-const projectService = new ProjectService(projectRepository);
+const adminKeyRepository = new AdminKeyRepository(logger);
+const projectService = new ProjectService(projectRepository, adminKeyRepository);
 const projectController = new ProjectController(projectService);
 
 router.post("/", asyncHandler((req, res) => projectController.createProject(req, res)));
