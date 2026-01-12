@@ -1,4 +1,4 @@
-import { ProjectRepository, CreateProjectData } from "./project.repository";
+import { ProjectRepository, CreateProjectData, UpdateProjectData } from "./project.repository";
 import { generateKey, generateHash, verifyKey } from "../../utils/keyGenerator";
 
 
@@ -12,6 +12,8 @@ export class ProjectService {
             name: projectData.name,
             api_key: hash,
             is_active: true,
+            created_at: new Date(),
+            updated_at: new Date(),
         }
         return this.projectRepository.createProject(project);
     }
@@ -24,11 +26,19 @@ export class ProjectService {
         return this.projectRepository.getProjectByApiKey(api_key);
     }
 
-    async updateProject(id: string, projectData: CreateProjectData) {
-        return this.projectRepository.updateProject(id, projectData);
+    async updateProject(api_key: string, projectData: UpdateProjectData) {
+        const project = {
+            name: projectData.name,
+            updated_at: new Date(),
+        }
+        return this.projectRepository.updateProject(api_key, project);
     }
 
-    async deleteProject(id: string) {
-        return this.projectRepository.deleteProject(id);
+    async disableProject(project_id: string) {
+        return this.projectRepository.disableProject(project_id);
+    }
+
+    async enableProject(project_id: string) {
+        return this.projectRepository.enableProject(project_id);
     }
 }

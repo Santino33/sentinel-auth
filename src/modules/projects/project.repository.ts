@@ -6,6 +6,13 @@ export type CreateProjectData = {
     name: string;
     api_key: string;
     is_active?: boolean;
+    created_at?: Date;
+    updated_at?: Date;
+}
+
+export type UpdateProjectData = {
+    name?: string;
+    updated_at?: Date;
 }
 
 export class ProjectRepository {
@@ -15,11 +22,21 @@ export class ProjectRepository {
         const project = await prisma.projects.create({
             data: projectData,
         });
+        if (!project) {
+            this.logger.warn("ProjectRepository", "createProject", "No project created");
+        } else {
+            this.logger.info("ProjectRepository", "createProject", "Project created successfully");
+        }
         return project;
     }
 
     async getProjects() {
         const projects = await prisma.projects.findMany();
+        if (!projects || projects.length === 0) {
+            this.logger.warn("ProjectRepository", "getProjects", "No projects found");
+        } else {
+            this.logger.info("ProjectRepository", "getProjects", "Projects retrieved successfully");
+        }
         return projects.map(project => ({
             id: project.id,
             name: project.name,
@@ -42,25 +59,62 @@ export class ProjectRepository {
                 updated_at: true,
             },
         });
+        if (!project) {
+            this.logger.warn("ProjectRepository", "getProjectByApiKey", `No project found for the provided API key`);
+        } else {
+            this.logger.info("ProjectRepository", "getProjectByApiKey", "Project retrieved successfully");
+        }
         return project;
     }
 
-    async updateProject(id: string, projectData: CreateProjectData) {
+    async updateProject(api_key: string, projectData: UpdateProjectData) {
         const project = await prisma.projects.update({
             where: {
-                id: id,
+                api_key: api_key,
             },
-            data: projectData,
+            data: projectData
         });
+        if (!project) {
+            this.logger.warn("ProjectRepository", "updateProject", `No project updated for the provided API key`);
+        } else {
+            this.logger.info("ProjectRepository", "updateProject", "Project updated successfully");
+        }
         return project;
     }
 
-    async deleteProject(id: string) {
-        const project = await prisma.projects.delete({
+    async disableProject(project_id: string) {
+        const project = await prisma.projects.update({
             where: {
-                id: id,
+                id: project_id,
             },
+            data: {
+                is_active: false,
+                updated_at: new Date(),
+            }
         });
+        if (!project) {
+            this.logger.warn("ProjectRepository", "disableProject", `No project disabled for the provided ID`);
+        } else {
+            this.logger.info("ProjectRepository", "disableProject", "Project disabled successfully");
+        }
+        return project;
+    }
+
+    async enableProject(project_id: string) {
+        const project = await prisma.projects.update({
+            where: {
+                id: project_id,
+            },
+            data: {
+                is_active: true,
+                updated_at: new Date(),
+            }
+        });
+        if (!project) {
+            this.logger.warn("ProjectRepository", "enableProject", `No project enabled for the provided ID`);
+        } else {
+            this.logger.info("ProjectRepository", "enableProject", "Project enabled successfully");
+        }
         return project;
     }
 }

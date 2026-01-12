@@ -20,12 +20,17 @@ export class ProjectController {
     }
 
     async updateProject(req: Request, res: Response) {
-        const project = await this.projectService.updateProject(req.params.id, req.body);
+        const project = await this.projectService.updateProject(req.params.api_key, req.body);
         return res.status(200).json(project);
     }
 
-    async deleteProject(req: Request, res: Response) {
-        const project = await this.projectService.deleteProject(req.params.id);
+    async disableProject(req: Request, res: Response) {
+        const project = await this.projectService.disableProject(req.params.id);
+        return res.status(200).json(project);
+    }
+
+    async enableProject(req: Request, res: Response) {
+        const project = await this.projectService.enableProject(req.params.id);
         return res.status(200).json(project);
     }
 }

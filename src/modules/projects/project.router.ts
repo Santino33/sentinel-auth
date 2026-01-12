@@ -16,7 +16,7 @@ router.get("/", asyncHandler((req, res) => projectController.getProjects(req, re
 router.get("/:apiKey", asyncHandler((req, res) => projectController.getProjectByApiKey(req, res)));
 
 router.put("/:apiKey", asyncHandler((req, res) => projectController.updateProject(req, res)));
-router.patch("/:apiKey", asyncHandler((req, res) => projectController.disableProject(req, res)));
-router.patch("/enable/:apiKey", asyncHandler((req, res) => projectController.enableProject(req, res)));
+router.patch("/disable/:id", asyncHandler((req, res) => projectController.disableProject(req, res)));
+router.patch("/enable/:id", asyncHandler((req, res) => projectController.enableProject(req, res)));
 
 export default router;

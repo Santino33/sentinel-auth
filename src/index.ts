@@ -1,6 +1,7 @@
 import express from "express";
 import dotenv from "dotenv";
 import adminRouter from "./modules/adminKeys/adminKey.router";
+import projectRouter from "./modules/projects/project.router";
 import { bootstrap } from "./utils/bootstrap";
 import { errorHandler } from "./middleware/errorHandler";
 
@@ -21,6 +22,7 @@ const start = async () => {
 
     // Routes
     app.use("/api/admin", adminRouter);
+    app.use("/api/projects", projectRouter);
 
     // Global Error Handler
     app.use(errorHandler);
