@@ -15,11 +15,11 @@ export class ProjectService {
     constructor(private projectRepository: ProjectRepository, private adminKeyRepository: AdminKeyRepository) {}
 
     async createProject(projectData: CreateProjectData, providedAdminKey: string) {
-        const projectRetrieved = await this.projectRepository.getProjectByApiKey(projectData.api_key);
         const adminKey = await this.adminKeyRepository.getAdminKeybyKey(providedAdminKey);
-
-        assertProjectName(projectData);
         assertAdminKeyIsActive(adminKey);
+
+        const projectRetrieved = await this.projectRepository.getProjectByApiKey(projectData.api_key);
+        assertProjectName(projectData);
         assertProjectNameIsNotRepeated(projectRetrieved?.name, projectData.name);
         
         const apiKey = await generateKey();
@@ -60,7 +60,10 @@ export class ProjectService {
         return this.projectRepository.updateProject(api_key, updateData);
     }
 
-    async disableProject(project_id: string) {
+    async disableProject(project_id: string, providedAdminKey: string) {
+        const adminKey = await this.adminKeyRepository.getAdminKeybyKey(providedAdminKey);
+        assertAdminKeyIsActive(adminKey);
+
         const project = await this.projectRepository.getProjectById(project_id);
         assertProjectExists(project);
         assertProjectIsNotDisabled(project);
@@ -68,7 +71,10 @@ export class ProjectService {
         return this.projectRepository.disableProject(project_id);
     }
 
-    async enableProject(project_id: string) {
+    async enableProject(project_id: string, providedAdminKey: string) {
+        const adminKey = await this.adminKeyRepository.getAdminKeybyKey(providedAdminKey);
+        assertAdminKeyIsActive(adminKey);
+
         const project = await this.projectRepository.getProjectById(project_id);
         assertProjectExists(project);
         assertProjectIsNotActive(project);

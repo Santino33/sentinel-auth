@@ -25,12 +25,12 @@ export class ProjectController {
     }
 
     async disableProject(req: Request, res: Response) {
-        const project = await this.projectService.disableProject(req.params.id);
+        const project = await this.projectService.disableProject(req.params.id, req.params.admin_key);  
         return res.status(200).json(project);
     }
 
     async enableProject(req: Request, res: Response) {
-        const project = await this.projectService.enableProject(req.params.id);
+        const project = await this.projectService.enableProject(req.params.id, req.params.admin_key);
         return res.status(200).json(project);
     }
 }

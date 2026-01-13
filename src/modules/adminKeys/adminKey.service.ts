@@ -1,11 +1,11 @@
 import { generateKey, generateHash, verifyKey } from "../../utils/keyGenerator";
 import { AdminKeyRepository, CreateAdminKeyData } from "./adminKey.repository";
-import { AdminKeyNotFoundError, AdminKeyRequiredError } from "../../errors/AdminKeyError";
+import { assertAdminKeyAlreadyActive, assertAdminKeyAlreadyDisabled, assertAdminKeyExists, assertAdminKeyIsActive, assertAdminKeyNotAbleToDisable } from "./adminKey.guards";
 
 export class AdminKeyService {
   constructor(private repo: AdminKeyRepository) {}
 
-  async createKey() {
+  async createKey(providedAdminKey: string) {
     const adminKey = await generateKey();
     const hash = await generateHash(adminKey);
     const createdKey = await this.repo.createAdminKey({ key: hash, is_active: true });
@@ -15,46 +15,43 @@ export class AdminKeyService {
     };
   }
 
-  async updateAdminKey(id: string, adminKeyData: CreateAdminKeyData) {
+  async updateAdminKey(id: string, adminKeyData: CreateAdminKeyData, providedAdminKey: string) {
     const adminKey = await this.repo.updateAdminKey(id, adminKeyData);
+    assertAdminKeyExists(adminKey);
     return adminKey;
   }
 
-  async getAdminKeyByValue(key: string) {
+  async getAdminKeyByValue(key: string, providedAdminKey: string) {
     const adminKey = await this.repo.getAdminKey(key);
-    if (!adminKey) {
-        throw new AdminKeyNotFoundError();
-    }
+    assertAdminKeyExists(adminKey);
     return adminKey;
   }
 
-  async disableBootstrapAdminKey() {
+  async disableBootstrapAdminKey(providedAdminKey: string) {
     const adminKeysCount = await this.repo.getActiveAdminKeysCount();
-    if (adminKeysCount < 2) {
-        throw new AdminKeyRequiredError("Cannot disable bootstrap admin key. At least one active admin key is required, create a new admin key first");
-    }
+    assertAdminKeyNotAbleToDisable(adminKeysCount);
     const adminKey = await this.repo.disableBootstrapAdminKey();
+    assertAdminKeyExists(adminKey);
     return adminKey;
   }
 
-  async disableAdminKey(id: string) {
+  async disableAdminKey(id: string, providedAdminKey: string) {
     const adminKeysCount = await this.repo.getActiveAdminKeysCount();
-    if (adminKeysCount < 2) {
-        throw new AdminKeyRequiredError("Cannot disable admin key. At least one active admin key is required, create a new admin key first");
-    }
+    assertAdminKeyNotAbleToDisable(adminKeysCount);
+
     const adminKey = await this.repo.getAdminKeyById(id);
-    if (!adminKey) {
-        throw new AdminKeyNotFoundError();
-    }
+    assertAdminKeyExists(adminKey);
+    assertAdminKeyAlreadyDisabled(adminKey);
+
     await this.repo.updateAdminKey(id, { is_active: false, key: adminKey.key });
     return adminKey;
   }
 
-  async enableAdminKey(id: string) {
+  async enableAdminKey(id: string, providedAdminKey: string) {
     const adminKey = await this.repo.getAdminKeyById(id);
-    if (!adminKey) {
-        throw new AdminKeyNotFoundError();
-    }
+    assertAdminKeyExists(adminKey);
+    assertAdminKeyAlreadyActive(adminKey);
+
     await this.repo.updateAdminKey(id, { is_active: true, key: adminKey.key });
     return adminKey;
   }
