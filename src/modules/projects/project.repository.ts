@@ -1,4 +1,4 @@
-import { Logger } from "src/utils/logger";
+import { Logger } from "../../utils/logger";
 import { prisma } from "../../lib/prisma";
 
 
@@ -53,7 +53,7 @@ export class ProjectRepository {
     }
 
     async getProjectByApiKey(api_key: string) {
-        const project = await prisma.projects.findUnique({
+        const project = await prisma.projects.findFirst({
             where: {
                 api_key: api_key,
             },
@@ -74,7 +74,7 @@ export class ProjectRepository {
     }
 
     async getProjectById(id: string) {
-        const project = await prisma.projects.findUnique({
+        const project = await prisma.projects.findFirst({
             where: {
                 id: id,
             },

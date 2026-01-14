@@ -1,5 +1,6 @@
 import { ProjectRepository, CreateProjectData, UpdateProjectData } from "./project.repository";
 import { AdminKeyRepository } from "../adminKeys/adminKey.repository";
+import { AdminKeyNotFoundError } from "../../errors/AdminKeyError";
 import { generateKey, generateHash } from "../../utils/keyGenerator";
 import { 
     assertProjectName, 
@@ -8,25 +9,26 @@ import {
     assertProjectIsNotDisabled, 
     assertProjectIsNotActive,
     assertAdminKeyIsActive,
+    assertAdminKeyExists,
     assertProjectNameIsNotRepeated
 } from "./project.guards";
 
 export class ProjectService {
     constructor(private projectRepository: ProjectRepository, private adminKeyRepository: AdminKeyRepository) {}
 
-    async createProject(projectData: CreateProjectData, providedAdminKey: string) {
-        const adminKey = await this.adminKeyRepository.getAdminKeybyKey(providedAdminKey);
-        assertAdminKeyIsActive(adminKey);
+    async createProject(projectName: string, providedAdminKey: string) {
+        const isValid = await this.adminKeyRepository.validateKey(providedAdminKey);
+        if (!isValid) throw new AdminKeyNotFoundError();
 
-        const projectRetrieved = await this.projectRepository.getProjectByApiKey(projectData.api_key);
-        assertProjectName(projectData);
-        assertProjectNameIsNotRepeated(projectRetrieved?.name, projectData.name);
+        const projectRetrieved = await this.projectRepository.getProjectByApiKey(projectName);
+        assertProjectName(projectName);
+        assertProjectNameIsNotRepeated(projectRetrieved?.name, projectName);
         
         const apiKey = await generateKey();
         const hash = await generateHash(apiKey);
         
         const project = {
-            name: projectData.name,
+            name: projectName,
             api_key: hash,
             is_active: true,
             created_at: new Date(),
@@ -36,7 +38,10 @@ export class ProjectService {
         return this.projectRepository.createProject(project);
     }
 
-    async getProjects() {
+    async getProjects(providedAdminKey: string) {
+        const isValid = await this.adminKeyRepository.validateKey(providedAdminKey);
+        if (!isValid) throw new AdminKeyNotFoundError();
+
         return this.projectRepository.getProjects();
     }
 
@@ -60,25 +65,25 @@ export class ProjectService {
         return this.projectRepository.updateProject(api_key, updateData);
     }
 
-    async disableProject(project_id: string, providedAdminKey: string) {
-        const adminKey = await this.adminKeyRepository.getAdminKeybyKey(providedAdminKey);
-        assertAdminKeyIsActive(adminKey);
+    async disableProject(api_key: string, providedAdminKey: string) {
+        const isValid = await this.adminKeyRepository.validateKey(providedAdminKey);
+        if (!isValid) throw new AdminKeyNotFoundError();
 
-        const project = await this.projectRepository.getProjectById(project_id);
+        const project = await this.projectRepository.getProjectByApiKey(api_key);
         assertProjectExists(project);
         assertProjectIsNotDisabled(project);
         
-        return this.projectRepository.disableProject(project_id);
+        return this.projectRepository.disableProject(api_key);
     }
 
-    async enableProject(project_id: string, providedAdminKey: string) {
-        const adminKey = await this.adminKeyRepository.getAdminKeybyKey(providedAdminKey);
-        assertAdminKeyIsActive(adminKey);
+    async enableProject(api_key: string, providedAdminKey: string) {
+        const isValid = await this.adminKeyRepository.validateKey(providedAdminKey);
+        if (!isValid) throw new AdminKeyNotFoundError();
 
-        const project = await this.projectRepository.getProjectById(project_id);
+        const project = await this.projectRepository.getProjectByApiKey(api_key);
         assertProjectExists(project);
         assertProjectIsNotActive(project);
         
-        return this.projectRepository.enableProject(project_id);
+        return this.projectRepository.enableProject(api_key);
     }
 }

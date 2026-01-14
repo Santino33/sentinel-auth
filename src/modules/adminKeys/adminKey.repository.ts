@@ -1,5 +1,6 @@
 import { prisma } from "../../lib/prisma";
 import {Logger} from "../../utils/logger";
+import { verifyKey } from "../../utils/keyGenerator";
 
 export type CreateAdminKeyData = {
     key: string;
@@ -38,7 +39,8 @@ export class AdminKeyRepository {
     }
 
     async getAdminKeyById(id: string) {
-        const adminKey = await prisma.admin_keys.findUnique({
+        if (!id) return null;
+        const adminKey = await prisma.admin_keys.findFirst({
             where: {
                 id: id,
             },
@@ -52,7 +54,8 @@ export class AdminKeyRepository {
     }
 
     async getAdminKeybyKey(key: string) {
-        const adminKey = await prisma.admin_keys.findUnique({
+        if (!key) return null;
+        const adminKey = await prisma.admin_keys.findFirst({
             where: { key: key },
             select: {
                 id: true,
@@ -69,7 +72,8 @@ export class AdminKeyRepository {
     }
 
     async getAdminKey(key: string) {
-        const adminKey = await prisma.admin_keys.findUnique({
+        if (!key) return null;
+        const adminKey = await prisma.admin_keys.findFirst({
             where: { key: key },
         });
         if (!adminKey) {
@@ -134,6 +138,7 @@ export class AdminKeyRepository {
     }
 
     async updateAdminKey(id: string, adminKeyData: CreateAdminKeyData) {
+        if (!id) return null;
         const adminKey = await prisma.admin_keys.update({
             where: {
                 id: id,
@@ -146,6 +151,18 @@ export class AdminKeyRepository {
             this.logger.info("AdminKeyRepository", "updateAdminKey", "Admin key updated successfully");
         }
         return adminKey;
+    }
+
+    async validateKey(providedKey: string): Promise<boolean> {
+        if (!providedKey) return false;
+        const activeKeys = await this.getAdminKeys();
+        for (const adminKey of activeKeys) {
+            if (adminKey.is_active && adminKey.key) {
+                const match = await verifyKey(providedKey, adminKey.key);
+                if (match) return true;
+            }
+        }
+        return false;
     }
 }
 

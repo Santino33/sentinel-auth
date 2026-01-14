@@ -77,10 +77,11 @@ export function assertAdminKeyIsActive(adminKey: AdminKeyEntity): void {
 
 /**
  * Asserts that the project name is valid.
- * @param data Data containing the project name
+ * @param projectName The project name to check
+ * @throws {ProjectNameRequiredError}
  */
-export function assertProjectName(data: { name: string }): void {
-    if (!data.name || data.name.trim().length === 0) {
+export function assertProjectName(projectName: string): void {
+    if (!projectName || projectName.trim().length === 0) {
         throw new ProjectNameRequiredError();
     }
 }

@@ -1,4 +1,4 @@
-import { NotFoundError, BadRequestError } from "./HttpError";
+import { NotFoundError, BadRequestError, ForbiddenError } from "./HttpError";
 
 export class AdminKeyNotFoundError extends NotFoundError {
   constructor(message: string = "Admin key not found") {
@@ -12,7 +12,7 @@ export class AdminKeyRequiredError extends BadRequestError {
   }
 }
 
-export class AdminKeyDisabledError extends BadRequestError {
+export class AdminKeyDisabledError extends ForbiddenError {
   constructor(message: string = "Admin key is disabled") {
     super(message, "ADMIN_KEY_DISABLED");
   }

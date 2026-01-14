@@ -1,7 +1,7 @@
 import express from "express";
 import dotenv from "dotenv";
-import adminRouter from "./modules/adminKeys/adminKey.router";
-import projectRouter from "./modules/projects/project.router";
+import adminContextRouter from "./routes/admin.routes";
+import projectContextRouter from "./routes/project.routes";
 import { bootstrap } from "./utils/bootstrap";
 import { errorHandler } from "./middleware/errorHandler";
 
@@ -20,9 +20,9 @@ const start = async () => {
         res.status(200).json({ status: "ok", timestamp: new Date().toISOString() });
     });
 
-    // Routes
-    app.use("/api/admin", adminRouter);
-    app.use("/api/projects", projectRouter);
+    // Context-based Routing
+    app.use("/api/admin", adminContextRouter);
+    app.use("/api", projectContextRouter);
 
     // Global Error Handler
     app.use(errorHandler);

@@ -1,4 +1,5 @@
-import { AdminKeyDisabledError, AdminKeyNotFoundError, AdminKeyAlreadyDisabledError, AdminKeyAlreadyActiveError, NotEnoughAdminKeysError } from "src/errors/AdminKeyError";
+
+import { AdminKeyDisabledError, AdminKeyNotFoundError, AdminKeyAlreadyDisabledError, AdminKeyAlreadyActiveError, NotEnoughAdminKeysError } from "../../errors/AdminKeyError";
 import { AdminKeyEntity } from "./adminKey.repository";
 
 /**
@@ -6,6 +7,7 @@ import { AdminKeyEntity } from "./adminKey.repository";
  * @throws {AdminKeyNotFoundError}
  */
 export function assertAdminKeyExists(adminKey: unknown): asserts adminKey is AdminKeyEntity {
+    console.log("Admin key provided to authenticate request:"+adminKey);
     if (!adminKey) {
         throw new AdminKeyNotFoundError();
     }
@@ -22,21 +24,21 @@ export function assertAdminKeyIsActive(adminKey: AdminKeyEntity): void {
 }
 
 /**
- * Asserts that an admin key is already disabled.
+ * Asserts that an admin key is not already disabled.
  * @throws {AdminKeyAlreadyDisabledError}
  */
-export function assertAdminKeyAlreadyDisabled(adminKey: AdminKeyEntity): void {
-    if (adminKey.is_active) {
+export function assertAdminKeyIsNotDisabled(adminKey: AdminKeyEntity): void {
+    if (!adminKey.is_active) {
         throw new AdminKeyAlreadyDisabledError();
     }
 }
 
 /**
- * Asserts that an admin key is already active.
+ * Asserts that an admin key is not already active.
  * @throws {AdminKeyAlreadyActiveError}
  */
-export function assertAdminKeyAlreadyActive(adminKey: AdminKeyEntity): void {
-    if (!adminKey.is_active) {
+export function assertAdminKeyIsNotActive(adminKey: AdminKeyEntity): void {
+    if (adminKey.is_active) {
         throw new AdminKeyAlreadyActiveError();
     }
 }

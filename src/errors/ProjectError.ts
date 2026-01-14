@@ -29,5 +29,10 @@ export class ProjectNameRequiredError extends BadRequestError {
     super(message, "PROJECT_NAME_REQUIRED");
   }
 }
+export class ProjectNameIsRepeatedError extends BadRequestError {
+  constructor(message: string = "Project name is repeated") {
+    super(message, "PROJECT_NAME_IS_REPEATED");
+  }
+}
 
 
