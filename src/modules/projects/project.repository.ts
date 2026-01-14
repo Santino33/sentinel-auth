@@ -103,7 +103,14 @@ export class ProjectRepository {
             where: {
                 id: id,
             },
-            data: projectData
+            data: projectData,
+            select: {
+                id: true,
+                name: true,
+                is_active: true,
+                created_at: true,
+                updated_at: true,
+            },
         });
         if (!project) {
             this.logger.warn("ProjectRepository", "updateProject", `No project updated for the provided ID`);
@@ -125,7 +132,14 @@ export class ProjectRepository {
             data: {
                 is_active: false,
                 updated_at: new Date(),
-            }
+            },
+            select: {
+                id: true,
+                name: true,
+                is_active: true,
+                created_at: true,
+                updated_at: true,
+            },
         });
         if (!project) {
             this.logger.warn("ProjectRepository", "disableProject", `No project disabled for the provided ID`);
@@ -147,7 +161,14 @@ export class ProjectRepository {
             data: {
                 is_active: true,
                 updated_at: new Date(),
-            }
+            },
+            select: {
+                id: true,
+                name: true,
+                is_active: true,
+                created_at: true,
+                updated_at: true,
+            },
         });
         if (!project) {
             this.logger.warn("ProjectRepository", "enableProject", `No project enabled for the provided ID`);

@@ -20,6 +20,11 @@ export class AdminKeyRepository {
     async createAdminKey(adminKeyData: CreateAdminKeyData) {
         const adminKey = await prisma.admin_keys.create({
             data: adminKeyData,
+            select: {
+                id: true,
+                key: true,
+                is_active: true,
+            },
         });
         if (!adminKey) {
             this.logger.warn("AdminKeyRepository", "createAdminKey", `No admin key created for the provided value`);
@@ -30,7 +35,13 @@ export class AdminKeyRepository {
     }
 
     async getAdminKeys() {
-        const adminKeys = await prisma.admin_keys.findMany();
+        const adminKeys = await prisma.admin_keys.findMany({
+            select: {
+                id: true,
+                key: true,
+                is_active: true,
+            },
+        });
         if (!adminKeys) {
             this.logger.warn("AdminKeyRepository", "getAdminKeys", `No admin keys found for the provided value`);
         } else {
@@ -47,6 +58,10 @@ export class AdminKeyRepository {
         const adminKey = await prisma.admin_keys.findFirst({
             where: {
                 id: id,
+            },
+            select: {
+                id: true,
+                is_active: true,
             },
         });
         if (!adminKey) {
@@ -110,6 +125,10 @@ export class AdminKeyRepository {
             data: {
                 is_active: false,
             },
+            select: {
+                id: true,
+                is_active: true
+            },
         });
 
         this.logger.info("AdminKeyRepository", "disableBootstrapAdminKey", "Bootstrap admin key disabled successfully");
@@ -126,6 +145,10 @@ export class AdminKeyRepository {
                 id: id,
             },
             data: adminKeyData,
+            select: {
+                id: true,
+                is_active: true,
+            },
         });
         if (!adminKey) {
             this.logger.warn("AdminKeyRepository", "updateAdminKey", `No admin key found for the provided value`);

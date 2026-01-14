@@ -7,7 +7,6 @@ import { AdminKeyEntity } from "./adminKey.repository";
  * @throws {AdminKeyNotFoundError}
  */
 export function assertAdminKeyExists(adminKey: unknown): asserts adminKey is AdminKeyEntity {
-    console.log("Admin key provided to authenticate request:"+adminKey);
     if (!adminKey) {
         throw new AdminKeyNotFoundError();
     }

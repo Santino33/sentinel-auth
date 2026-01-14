@@ -5,24 +5,24 @@ export class AdminController{
     constructor(private service: AdminKeyService) {}
     
     async createKey(req: Request, res: Response) {
-        const { key, id } = await this.service.createKey();
-        return res.status(201).json({ key, id });
+        const createdKey = await this.service.createKey();
+        return res.status(201).json(createdKey);
     }
 
     async disableBootstrapKey(req: Request, res: Response) {
-        await this.service.disableBootstrapAdminKey();
-        return res.status(200).json('Bootstrap key disabled successfully');
+        const disabledKey = await this.service.disableBootstrapAdminKey();
+        return res.status(200).json(disabledKey);
     }
 
     async disableAdminKey(req: Request, res: Response) {
         const { id } = req.params;
-        await this.service.disableAdminKey(id);
-        return res.status(200).json('Admin key disabled successfully');
+        const disabledKey = await this.service.disableAdminKey(id);
+        return res.status(200).json(disabledKey);
     }
 
     async enableAdminKey(req: Request, res: Response) {
         const { id } = req.params;
-        await this.service.enableAdminKey(id);
-        return res.status(200).json('Admin key enabled successfully');
+        const enabledKey = await this.service.enableAdminKey(id);
+        return res.status(200).json(enabledKey);
     }
 }
