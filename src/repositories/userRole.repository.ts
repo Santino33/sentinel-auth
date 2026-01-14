@@ -1,4 +1,4 @@
-import { prisma } from "../../lib/prisma";
+import { prisma } from "../lib/prisma";
 
 type CreateUserRoleData = {
     user_id: string;

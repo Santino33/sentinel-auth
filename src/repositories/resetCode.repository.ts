@@ -1,4 +1,4 @@
-import { prisma } from "../../lib/prisma";
+import { prisma } from "../lib/prisma";
 
 type CreateResetCodeData = {
     user_id: string;

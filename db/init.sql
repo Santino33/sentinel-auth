@@ -96,6 +96,7 @@ CREATE TABLE admin_keys (
     key         VARCHAR(255) NOT NULL UNIQUE,
     description TEXT,
     is_active   BOOLEAN DEFAULT TRUE,
+    is_bootstrap BOOLEAN DEFAULT FALSE,
     created_at  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 

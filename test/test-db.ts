@@ -1,11 +1,12 @@
 // test-db.ts
 // Script to demonstrate basic CRUD operations using repository classes.
 
-import { prisma } from "../lib/prisma";
+import { prisma } from "../src/lib/prisma";
+import { logger } from "../src/utils/logger";
 import { UserRepository } from "../src/repositories/user.repository";
 import { RoleRepository } from "../src/repositories/role.repository";
 import { ProjectRepository } from "../src/repositories/project.repository";
-import { AdminKeyRepository } from "../src/repositories/adminKey.repository";
+import { AdminKeyRepository } from "../src/modules/adminKeys/adminKey.repository";
 
 function log(message: string) {
   console.log(`[${new Date().toISOString()}] ${message}`);
@@ -15,7 +16,7 @@ async function main() {
   const projectRepo = new ProjectRepository();
   const userRepo = new UserRepository();
   const roleRepo = new RoleRepository();
-  const adminKeyRepo = new AdminKeyRepository();
+  const adminKeyRepo = new AdminKeyRepository(logger);
 
   // --- Create sample data ---
   log("Creating project...");

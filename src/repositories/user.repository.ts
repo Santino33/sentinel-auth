@@ -1,4 +1,4 @@
-import { prisma } from "../../lib/prisma";
+import { prisma } from "../lib/prisma";
 
 type CreateUserData = {
     project_id: string;
