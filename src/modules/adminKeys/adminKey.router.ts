@@ -17,7 +17,4 @@ router.patch("/disable-bootstrap", asyncHandler((req, res) => adminControllerIns
 router.patch("/disableAdminKey/:id", asyncHandler((req, res) => adminControllerInstance.disableAdminKey(req, res)));
 router.patch("/enableAdminKey/:id", asyncHandler((req, res) => adminControllerInstance.enableAdminKey(req, res)));
 
-router.post("/validate", asyncHandler((req, res) => adminControllerInstance.validateAdminKey(req, res)));
-
-
 export default router;

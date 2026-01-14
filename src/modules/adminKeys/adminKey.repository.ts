@@ -1,6 +1,7 @@
 import { prisma } from "../../lib/prisma";
 import {Logger} from "../../utils/logger";
 import { verifyKey } from "../../utils/keyGenerator";
+import { isValidUuid } from "../../utils/validation";
 
 export type CreateAdminKeyData = {
     key: string;
@@ -39,7 +40,10 @@ export class AdminKeyRepository {
     }
 
     async getAdminKeyById(id: string) {
-        if (!id) return null;
+        if (!id || !isValidUuid(id)) {
+            if (id) this.logger.warn("AdminKeyRepository", "getAdminKeyById", `Invalid UUID format provided: ${id}`);
+            return null;
+        }
         const adminKey = await prisma.admin_keys.findFirst({
             where: {
                 id: id,
@@ -53,36 +57,7 @@ export class AdminKeyRepository {
         return adminKey;
     }
 
-    async getAdminKeybyKey(key: string) {
-        if (!key) return null;
-        const adminKey = await prisma.admin_keys.findFirst({
-            where: { key: key },
-            select: {
-                id: true,
-                key: true,
-                is_active: true,
-            }
-        });
-        if (!adminKey) {
-            this.logger.warn("AdminKeyRepository", "getAdminKeybyKey", `No admin key found for the provided value`);
-        } else {
-            this.logger.info("AdminKeyRepository", "getAdminKeybyKey", "Admin key retrieved successfully");
-        }
-        return adminKey as AdminKeyEntity;
-    }
 
-    async getAdminKey(key: string) {
-        if (!key) return null;
-        const adminKey = await prisma.admin_keys.findFirst({
-            where: { key: key },
-        });
-        if (!adminKey) {
-            this.logger.warn("AdminKeyRepository", "getAdminKey", `No admin key found for the provided value`);
-        } else {
-            this.logger.info("AdminKeyRepository", "getAdminKey", "Admin key retrieved successfully");
-        }
-    return adminKey;
-    }
 
     async getActiveAdminKeysCount() {
         const adminKeysCount = await prisma.admin_keys.count({
@@ -99,6 +74,10 @@ export class AdminKeyRepository {
     }
 
     async deleteAdminKey(id: string) {
+        if (!isValidUuid(id)) {
+            this.logger.warn("AdminKeyRepository", "deleteAdminKey", `Invalid UUID format provided: ${id}`);
+            return null;
+        }
         const adminKey = await prisma.admin_keys.delete({
             where: {
                 id: id,
@@ -138,7 +117,10 @@ export class AdminKeyRepository {
     }
 
     async updateAdminKey(id: string, adminKeyData: CreateAdminKeyData) {
-        if (!id) return null;
+        if (!id || !isValidUuid(id)) {
+            if (id) this.logger.warn("AdminKeyRepository", "updateAdminKey", `Invalid UUID format provided: ${id}`);
+            return null;
+        }
         const adminKey = await prisma.admin_keys.update({
             where: {
                 id: id,
@@ -151,18 +133,6 @@ export class AdminKeyRepository {
             this.logger.info("AdminKeyRepository", "updateAdminKey", "Admin key updated successfully");
         }
         return adminKey;
-    }
-
-    async validateKey(providedKey: string): Promise<boolean> {
-        if (!providedKey) return false;
-        const activeKeys = await this.getAdminKeys();
-        for (const adminKey of activeKeys) {
-            if (adminKey.is_active && adminKey.key) {
-                const match = await verifyKey(providedKey, adminKey.key);
-                if (match) return true;
-            }
-        }
-        return false;
     }
 }
 

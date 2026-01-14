@@ -22,7 +22,7 @@ const start = async () => {
 
     // Context-based Routing
     app.use("/api/admin", adminContextRouter);
-    app.use("/api", projectContextRouter);
+    //app.use("/api", projectContextRouter);
 
     // Global Error Handler
     app.use(errorHandler);

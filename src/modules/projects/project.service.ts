@@ -1,6 +1,4 @@
 import { ProjectRepository, CreateProjectData, UpdateProjectData } from "./project.repository";
-import { AdminKeyRepository } from "../adminKeys/adminKey.repository";
-import { AdminKeyNotFoundError } from "../../errors/AdminKeyError";
 import { generateKey, generateHash } from "../../utils/keyGenerator";
 import { 
     assertProjectName, 
@@ -8,19 +6,14 @@ import {
     assertProjectIsActive, 
     assertProjectIsNotDisabled, 
     assertProjectIsNotActive,
-    assertAdminKeyIsActive,
-    assertAdminKeyExists,
     assertProjectNameIsNotRepeated
 } from "./project.guards";
 
 export class ProjectService {
-    constructor(private projectRepository: ProjectRepository, private adminKeyRepository: AdminKeyRepository) {}
+    constructor(private projectRepository: ProjectRepository) {}
 
-    async createProject(projectName: string, providedAdminKey: string) {
-        const isValid = await this.adminKeyRepository.validateKey(providedAdminKey);
-        if (!isValid) throw new AdminKeyNotFoundError();
-
-        const projectRetrieved = await this.projectRepository.getProjectByApiKey(projectName);
+    async createProject(projectName: string) {
+        const projectRetrieved = await this.projectRepository.getProjectByName(projectName);
         assertProjectName(projectName);
         assertProjectNameIsNotRepeated(projectRetrieved?.name, projectName);
         
@@ -38,22 +31,19 @@ export class ProjectService {
         return this.projectRepository.createProject(project);
     }
 
-    async getProjects(providedAdminKey: string) {
-        const isValid = await this.adminKeyRepository.validateKey(providedAdminKey);
-        if (!isValid) throw new AdminKeyNotFoundError();
-
+    async getProjects() {
         return this.projectRepository.getProjects();
     }
 
-    async getProjectByApiKey(api_key: string) {
-        const project = await this.projectRepository.getProjectByApiKey(api_key);
+    async getProjectById(id: string) {
+        const project = await this.projectRepository.getProjectById(id);
         assertProjectExists(project);
         
         return project;
     }
 
-    async updateProject(api_key: string, projectData: UpdateProjectData) {
-        const project = await this.projectRepository.getProjectByApiKey(api_key);
+    async updateProject(id: string, projectData: UpdateProjectData) {
+        const project = await this.projectRepository.getProjectById(id);
         assertProjectExists(project);
         assertProjectIsActive(project);
         
@@ -62,28 +52,22 @@ export class ProjectService {
             updated_at: new Date(),
         }
         
-        return this.projectRepository.updateProject(api_key, updateData);
+        return this.projectRepository.updateProject(id, updateData);
     }
 
-    async disableProject(api_key: string, providedAdminKey: string) {
-        const isValid = await this.adminKeyRepository.validateKey(providedAdminKey);
-        if (!isValid) throw new AdminKeyNotFoundError();
-
-        const project = await this.projectRepository.getProjectByApiKey(api_key);
+    async disableProject(id: string) {
+        const project = await this.projectRepository.getProjectById(id);
         assertProjectExists(project);
         assertProjectIsNotDisabled(project);
         
-        return this.projectRepository.disableProject(api_key);
+        return this.projectRepository.disableProject(id);
     }
 
-    async enableProject(api_key: string, providedAdminKey: string) {
-        const isValid = await this.adminKeyRepository.validateKey(providedAdminKey);
-        if (!isValid) throw new AdminKeyNotFoundError();
-
-        const project = await this.projectRepository.getProjectByApiKey(api_key);
+    async enableProject(id: string) {
+        const project = await this.projectRepository.getProjectById(id);
         assertProjectExists(project);
         assertProjectIsNotActive(project);
         
-        return this.projectRepository.enableProject(api_key);
+        return this.projectRepository.enableProject(id);
     }
 }

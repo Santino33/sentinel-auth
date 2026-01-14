@@ -1,5 +1,6 @@
 import { Logger } from "../../utils/logger";
 import { prisma } from "../../lib/prisma";
+import { isValidUuid } from "../../utils/validation";
 
 
 export type CreateProjectData = {
@@ -43,19 +44,13 @@ export class ProjectRepository {
         } else {
             this.logger.info("ProjectRepository", "getProjects", "Projects retrieved successfully");
         }
-        return projects.map(project => ({
-            id: project.id,
-            name: project.name,
-            is_active: project.is_active,
-            created_at: project.created_at,
-            updated_at: project.updated_at,
-        }));
+        return projects;
     }
 
-    async getProjectByApiKey(api_key: string) {
+    async getProjectByName(name: string) {
         const project = await prisma.projects.findFirst({
             where: {
-                api_key: api_key,
+                name: name,
             },
             select: {
                 id: true,
@@ -66,14 +61,19 @@ export class ProjectRepository {
             },
         });
         if (!project) {
-            this.logger.warn("ProjectRepository", "getProjectByApiKey", `No project found for the provided API key`);
+            this.logger.warn("ProjectRepository", "getProjectByName", `No project found for the provided name`);
         } else {
-            this.logger.info("ProjectRepository", "getProjectByApiKey", "Project retrieved successfully");
+            this.logger.info("ProjectRepository", "getProjectByName", "Project retrieved successfully");
         }
         return project;
     }
 
     async getProjectById(id: string) {
+        if (!isValidUuid(id)) {
+            this.logger.warn("ProjectRepository", "getProjectById", `Invalid UUID format provided: ${id}`);
+            return null;
+        }
+
         const project = await prisma.projects.findFirst({
             where: {
                 id: id,
@@ -94,15 +94,19 @@ export class ProjectRepository {
         return project;
     }
 
-    async updateProject(api_key: string, projectData: UpdateProjectData) {
+    async updateProject(id: string, projectData: UpdateProjectData) {
+        if (!isValidUuid(id)) {
+            this.logger.warn("ProjectRepository", "updateProject", `Invalid UUID format provided: ${id}`);
+            return null;
+        }
         const project = await prisma.projects.update({
             where: {
-                api_key: api_key,
+                id: id,
             },
             data: projectData
         });
         if (!project) {
-            this.logger.warn("ProjectRepository", "updateProject", `No project updated for the provided API key`);
+            this.logger.warn("ProjectRepository", "updateProject", `No project updated for the provided ID`);
         } else {
             this.logger.info("ProjectRepository", "updateProject", "Project updated successfully");
         }
@@ -110,6 +114,10 @@ export class ProjectRepository {
     }
 
     async disableProject(project_id: string) {
+        if (!isValidUuid(project_id)) {
+            this.logger.warn("ProjectRepository", "disableProject", `Invalid UUID format provided: ${project_id}`);
+            return null;
+        }
         const project = await prisma.projects.update({
             where: {
                 id: project_id,
@@ -128,6 +136,10 @@ export class ProjectRepository {
     }
 
     async enableProject(project_id: string) {
+        if (!isValidUuid(project_id)) {
+            this.logger.warn("ProjectRepository", "enableProject", `Invalid UUID format provided: ${project_id}`);
+            return null;
+        }
         const project = await prisma.projects.update({
             where: {
                 id: project_id,
