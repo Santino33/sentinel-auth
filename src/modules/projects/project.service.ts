@@ -20,15 +20,22 @@ export class ProjectService {
         const apiKey = await generateKey();
         const hash = await generateHash(apiKey);
         
-        const project = {
+        const project = await this.projectRepository.createProject({
             name: projectName,
             api_key: hash,
             is_active: true,
             created_at: new Date(),
             updated_at: new Date(),
-        }
+        });
         
-        return this.projectRepository.createProject(project);
+        return {
+            id: project.id,
+            name: project.name,
+            api_key: apiKey,
+            is_active: project.is_active,
+            created_at: project.created_at,
+            updated_at: project.updated_at,
+        }
     }
 
     async getProjects() {
