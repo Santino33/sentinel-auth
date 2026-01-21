@@ -35,3 +35,9 @@ export class RoleNotCreatedError extends InternalServerError {
         super(message, "ROLE_NOT_CREATED");
     }
 }
+
+export class RoleNotDeletedError extends InternalServerError {
+    constructor(message: string = "Role not deleted") {
+        super(message, "ROLE_NOT_DELETED");
+    }
+}

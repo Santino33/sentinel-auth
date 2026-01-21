@@ -14,6 +14,7 @@ const roleController = new RoleController(roleService);
 router.post("/", requireBody, asyncHandler((req, res) => roleController.createRole(req, res)));
 router.get("/", asyncHandler((req, res) => roleController.getRoles(req, res)));
 router.get("/:id", requireParams, asyncHandler((req, res) => roleController.getRoleById(req, res)));
-router.put("/:id", requireParams, asyncHandler((req, res) => roleController.updateRole(req, res)));
+router.patch("/:id", requireParams, asyncHandler((req, res) => roleController.updateRole(req, res)));
+router.delete("/:id", requireParams, asyncHandler((req, res) => roleController.deleteRole(req, res)));
 
 export default router;

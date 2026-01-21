@@ -11,17 +11,22 @@ export class RoleController {
     }
 
     async getRoles(req: Request, res: Response) {
-        const roles = await this.roleService.getRoles();
+        const roles = await this.roleService.getRolesByProjectId((req as any).project?.id);
         return res.status(200).json(roles);
     }
 
     async getRoleById(req: Request, res: Response) {
-        const role = await this.roleService.getRoleById(req.params.id);
+        const role = await this.roleService.getRoleById(req.params.id, (req as any).project?.id);
         return res.status(200).json(role);
     }
 
     async updateRole(req: Request, res: Response) {
-        const role = await this.roleService.updateRole(req.params.id, req.body);
+        const role = await this.roleService.updateRole(req.params.id, req.body, (req as any).project?.id);
+        return res.status(200).json(role);
+    }
+
+    async deleteRole(req: Request, res: Response) {
+        const role = await this.roleService.deleteRole(req.params.id, (req as any).project?.id);
         return res.status(200).json(role);
     }
 }

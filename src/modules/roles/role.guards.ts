@@ -1,4 +1,4 @@
-import { RoleNameIsRepeatedError, RoleNameRequiredError, RoleNotFoundError, RoleNotCreatedError, RoleNotUpdatedError } from "../../errors/RoleError";
+import { RoleNameIsRepeatedError, RoleNameRequiredError, RoleNotFoundError, RoleNotCreatedError, RoleNotUpdatedError, RoleNotDeletedError } from "../../errors/RoleError";
 import { RoleEntity } from "./role.repository";
 
 export function assertRoleIsNotRepeated(roleName: string | undefined, providedName: string): void {
@@ -28,5 +28,11 @@ export function assertRoleCreated(role: unknown): asserts role is RoleEntity {
 export function assertRoleUpdated(role: unknown): asserts role is RoleEntity {
     if (!role) {
         throw new RoleNotUpdatedError();
+    }
+}
+
+export function assertRoleDeleted(role: unknown): asserts role is RoleEntity {
+    if (!role) {
+        throw new RoleNotDeletedError();
     }
 }

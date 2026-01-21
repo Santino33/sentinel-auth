@@ -1,5 +1,5 @@
 import { RoleRepository, CreateRoleData, UpdateRoleData } from "./role.repository";
-import { assertRoleExists, assertRoleCreated, assertRoleIsNotRepeated, assertRoleName, assertRoleUpdated } from "./role.guards";
+import { assertRoleExists, assertRoleCreated, assertRoleIsNotRepeated, assertRoleName, assertRoleUpdated, assertRoleDeleted } from "./role.guards";
 
 export class RoleService {
     constructor(private roleRepository: RoleRepository) {}
@@ -13,23 +13,31 @@ export class RoleService {
         return role;
     }
 
-    async getRoles() {
-        const roles = await this.roleRepository.getRoles();
+    async getRolesByProjectId(projectId: string) {
+        const roles = await this.roleRepository.getRolesByProjectId(projectId);
         return roles;
     }
 
-    async getRoleById(id: string) {
-        const role = await this.roleRepository.getRoleById(id);
-        assertRoleExists(role);
-        return role;
+    async getRoleById(id: string, projectId: string) {
+        const roleRetrieved = await this.roleRepository.getRolesByIdAndProjectId(id, projectId);
+        assertRoleExists(roleRetrieved);
+        return roleRetrieved;
     }
 
-    async updateRole(id: string, roleData: UpdateRoleData) {
+    async updateRole(id: string, roleData: UpdateRoleData, projectId: string) {
         assertRoleName(roleData.name);
-        const roleRetrieved = await this.roleRepository.getRoleById(id);
+        const roleRetrieved = await this.roleRepository.getRolesByIdAndProjectId(id, projectId);
         assertRoleExists(roleRetrieved);
         const role = await this.roleRepository.updateRole(id, roleData);
         assertRoleUpdated(role);
+        return role;
+    }
+
+    async deleteRole(id: string, projectId: string) {
+        const roleRetrieved = await this.roleRepository.getRolesByIdAndProjectId(id, projectId);
+        assertRoleExists(roleRetrieved);
+        const role = await this.roleRepository.deleteRole(id);
+        assertRoleDeleted(role);
         return role;
     }
 }
