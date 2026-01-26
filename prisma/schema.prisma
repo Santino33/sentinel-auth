@@ -28,14 +28,14 @@ model password_reset_codes {
 }
 
 model projects {
-  id         String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  name       String    @db.VarChar(100)
-  api_key    String    @unique @db.VarChar(255)
-  is_active  Boolean?  @default(true)
-  created_at DateTime  @default(now()) @db.Timestamp(6)
-  updated_at DateTime? @db.Timestamp(6)
-  roles      roles[]
-  users      users[]
+  id            String          @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  name          String          @db.VarChar(100)
+  api_key       String          @unique @db.VarChar(255)
+  is_active     Boolean?        @default(true)
+  created_at    DateTime        @default(now()) @db.Timestamp(6)
+  updated_at    DateTime?       @db.Timestamp(6)
+  roles         roles[]
+  project_users project_users[]
 }
 
 model refresh_tokens {
@@ -51,41 +51,42 @@ model refresh_tokens {
 }
 
 model roles {
-  id         String       @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  project_id String       @db.Uuid
-  name       String       @db.VarChar(50)
-  projects   projects     @relation(fields: [project_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_roles_project")
-  user_roles user_roles[]
+  id            String          @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  project_id    String          @db.Uuid
+  name          String          @db.VarChar(50)
+  projects      projects        @relation(fields: [project_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_roles_project")
+  project_users project_users[]
 
   @@unique([project_id, name], map: "uq_role_name_per_project")
   @@index([project_id], map: "idx_roles_project_id")
 }
 
-model user_roles {
-  user_id String @db.Uuid
-  role_id String @db.Uuid
-  roles   roles  @relation(fields: [role_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_user_roles_role")
-  users   users  @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_user_roles_user")
+model project_users {
+  id         String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  project_id String   @db.Uuid
+  user_id    String   @db.Uuid
+  role_id    String   @db.Uuid
+  is_active  Boolean? @default(true)
+  created_at DateTime @default(now()) @db.Timestamp(6)
+  projects   projects @relation(fields: [project_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_project_users_project")
+  users      users    @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_project_users_user")
+  roles      roles    @relation(fields: [role_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_project_users_role")
 
-  @@id([user_id, role_id])
+  @@unique([project_id, user_id], map: "uq_project_user")
 }
 
 model users {
   id                   String                 @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  project_id           String                 @db.Uuid
   username             String                 @db.VarChar(100)
   email                String?                @db.VarChar(150)
   password_hash        String                 @db.VarChar(255)
-  salt                 String                 @db.VarChar(255)
   is_active            Boolean?               @default(true)
   created_at           DateTime               @default(now()) @db.Timestamp(6)
   updated_at           DateTime?              @db.Timestamp(6)
   password_reset_codes password_reset_codes[]
   refresh_tokens       refresh_tokens[]
-  user_roles           user_roles[]
-  projects             projects               @relation(fields: [project_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_users_project")
+  project_users        project_users[]
 
-  @@unique([project_id, email], map: "uq_user_email_per_project")
-  @@unique([project_id, username], map: "uq_user_username_per_project")
-  @@index([project_id], map: "idx_users_project_id")
+  @@unique([username], map: "uq_user_username")
+  @@unique([email], map: "uq_user_email")
 }

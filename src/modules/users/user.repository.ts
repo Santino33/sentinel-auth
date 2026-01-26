@@ -1,11 +1,9 @@
-import { prisma } from "../lib/prisma";
+import { prisma } from "../../lib/prisma";
 
 type CreateUserData = {
-    project_id: string;
     username: string;
     email?: string;
     password_hash: string;
-    salt: string;
     is_active?: boolean;
 }
 
@@ -34,13 +32,17 @@ export class UserRepository {
     async getUsersByProjectId(project_id: string) {
         const users = await prisma.users.findMany({
             where: {
-                project_id: project_id,
+                project_users: {
+                    some: {
+                        project_id: project_id,
+                    }
+                }
             },
         });
         return users;
     }
 
-    async updateUser(id: string, userData: CreateUserData) {
+    async updateUser(id: string, userData: Partial<CreateUserData>) {
         const user = await prisma.users.update({
             where: {
                 id: id,
