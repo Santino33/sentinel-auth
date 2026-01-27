@@ -4,13 +4,34 @@ import { asyncHandler } from "../../utils/asyncHandler";
 import { ProjectRepository } from "./project.repository";
 import { ProjectService } from "./project.service";
 import { ProjectController } from "./project.controller";
+import { ProjectBootstrapService } from "./projectBootstrap.service";
+import { UserRepository } from "../users/user.repository";
+import { RoleRepository } from "../roles/role.repository";
+import { UserRoleRepository } from "../../repositories/userRole.repository";
+import { ProjectUserRepository } from "../../repositories/projectUser.repository";
 import { requireBody, requireParams } from "../../middleware/validateRequest.middleware";
 
 const router = Router();
 
+// Repositories
 const projectRepository = new ProjectRepository(logger);
+const userRepository = new UserRepository();
+const roleRepository = new RoleRepository(logger);
+const userRoleRepository = new UserRoleRepository();
+const projectUserRepository = new ProjectUserRepository();
+
+// Services
 const projectService = new ProjectService(projectRepository);
-const projectController = new ProjectController(projectService);
+const projectBootstrapService = new ProjectBootstrapService(
+    projectRepository,
+    userRepository,
+    roleRepository,
+    userRoleRepository,
+    projectUserRepository
+);
+
+// Controller
+const projectController = new ProjectController(projectService, projectBootstrapService);
 
 router.post("/", requireBody, asyncHandler((req, res) => projectController.createProject(req, res)));
 router.get("/", asyncHandler((req, res) => projectController.getProjects(req, res)));

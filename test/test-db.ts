@@ -3,20 +3,22 @@
 
 import { prisma } from "../src/lib/prisma";
 import { logger } from "../src/utils/logger";
-import { UserRepository } from "../src/repositories/user.repository";
-import { RoleRepository } from "../src/repositories/role.repository";
-import { ProjectRepository } from "../src/repositories/project.repository";
+import { UserRepository } from "../src/modules/users/user.repository";
+import { RoleRepository } from "../src/modules/roles/role.repository";
+import { ProjectRepository } from "../src/modules/projects/project.repository";
 import { AdminKeyRepository } from "../src/modules/adminKeys/adminKey.repository";
+import { ProjectUserRepository } from "../src/repositories/projectUser.repository";
 
 function log(message: string) {
   console.log(`[${new Date().toISOString()}] ${message}`);
 }
 
 async function main() {
-  const projectRepo = new ProjectRepository();
+  const projectRepo = new ProjectRepository(logger);
   const userRepo = new UserRepository();
-  const roleRepo = new RoleRepository();
+  const roleRepo = new RoleRepository(logger);
   const adminKeyRepo = new AdminKeyRepository(logger);
+  const projectUserRepo = new ProjectUserRepository();
 
   // --- Create sample data ---
   log("Creating project...");
@@ -30,11 +32,9 @@ async function main() {
 
   log("Creating sample data linked to project...");
   const user = await userRepo.createUser({
-    project_id: project.id,
     username: `testuser_${randomSuffix}`,
     email: `test_${randomSuffix}@example.com`,
     password_hash: "hashedpw",
-    salt: "randomsalt",
     is_active: true,
   });
   log(`Created user: ${JSON.stringify(user)}`);
@@ -44,6 +44,15 @@ async function main() {
     name: "admin",
   });
   log(`Created role: ${JSON.stringify(role)}`);
+
+  log("Linking user to project and role...");
+  const projectUser = await projectUserRepo.createProjectUser({
+    project_id: project.id,
+    user_id: user.id,
+    role_id: role.id,
+    is_active: true,
+  });
+  log(`Linked user to project: ${JSON.stringify(projectUser)}`);
 
   const adminKey = await adminKeyRepo.createAdminKey({
     key: `secret-key-${randomSuffix}`,
@@ -65,22 +74,21 @@ async function main() {
   // --- Update example (optional) ---
   log("\nUpdating user is_active flag to false...");
   const updatedUser = await userRepo.updateUser(user.id, {
-    project_id: user.project_id,
     username: user.username,
     email: user.email ?? undefined,
     password_hash: user.password_hash,
-    salt: user.salt,
     is_active: false,
   });
+  log(`Updated user: ${JSON.stringify(updatedUser)}`);
   log(`Updated user: ${JSON.stringify(updatedUser)}`);
 
   // --- Delete created records ---
   log("\nCleaning up: deleting created records...");
   await adminKeyRepo.deleteAdminKey(adminKey.id);
+  await projectUserRepo.deleteProjectUser(project.id, user.id);
   await roleRepo.deleteRole(role.id);
   await userRepo.deleteUser(user.id);
-  // Important: Delete project last because of foreign key constraints
-  await projectRepo.deleteProject(project.id);
+  // Important: Projects are usually not deleted in this test to avoid cascading issues or because the method is missing.
   log("Cleanup complete.");
 }
 

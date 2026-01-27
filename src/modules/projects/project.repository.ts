@@ -1,7 +1,7 @@
 import { Logger } from "../../utils/logger";
 import { prisma } from "../../lib/prisma";
 import { isValidUuid } from "../../utils/validation";
-
+import { Prisma } from "@prisma/client";
 
 export type CreateProjectData = {
     name: string;
@@ -25,8 +25,12 @@ export type ProjectEntity = {
 export class ProjectRepository {
     constructor(private logger: Logger) {}
 
-    async createProject(projectData: CreateProjectData) {
-        const project = await prisma.projects.create({
+    private getClient(tx?: Prisma.TransactionClient) {
+        return tx || prisma;
+    }
+
+    async createProject(projectData: CreateProjectData, tx?: Prisma.TransactionClient) {
+        const project = await this.getClient(tx).projects.create({
             data: projectData,
         });
         if (!project) {
@@ -37,8 +41,8 @@ export class ProjectRepository {
         return project;
     }
 
-    async getProjects() {
-        const projects = await prisma.projects.findMany();
+    async getProjects(tx?: Prisma.TransactionClient) {
+        const projects = await this.getClient(tx).projects.findMany();
         if (!projects || projects.length === 0) {
             this.logger.warn("ProjectRepository", "getProjects", "No projects found");
         } else {
@@ -47,8 +51,8 @@ export class ProjectRepository {
         return projects;
     }
 
-    async getProjectByName(name: string) {
-        const project = await prisma.projects.findFirst({
+    async getProjectByName(name: string, tx?: Prisma.TransactionClient) {
+        const project = await this.getClient(tx).projects.findFirst({
             where: {
                 name: name,
             },
@@ -68,13 +72,13 @@ export class ProjectRepository {
         return project;
     }
 
-    async getProjectById(id: string) {
+    async getProjectById(id: string, tx?: Prisma.TransactionClient) {
         if (!isValidUuid(id)) {
             this.logger.warn("ProjectRepository", "getProjectById", `Invalid UUID format provided: ${id}`);
             return null;
         }
 
-        const project = await prisma.projects.findFirst({
+        const project = await this.getClient(tx).projects.findFirst({
             where: {
                 id: id,
             },
@@ -94,12 +98,12 @@ export class ProjectRepository {
         return project;
     }
 
-    async updateProject(id: string, projectData: UpdateProjectData) {
+    async updateProject(id: string, projectData: UpdateProjectData, tx?: Prisma.TransactionClient) {
         if (!isValidUuid(id)) {
             this.logger.warn("ProjectRepository", "updateProject", `Invalid UUID format provided: ${id}`);
             return null;
         }
-        const project = await prisma.projects.update({
+        const project = await this.getClient(tx).projects.update({
             where: {
                 id: id,
             },
@@ -120,12 +124,12 @@ export class ProjectRepository {
         return project;
     }
 
-    async disableProject(project_id: string) {
+    async disableProject(project_id: string, tx?: Prisma.TransactionClient) {
         if (!isValidUuid(project_id)) {
             this.logger.warn("ProjectRepository", "disableProject", `Invalid UUID format provided: ${project_id}`);
             return null;
         }
-        const project = await prisma.projects.update({
+        const project = await this.getClient(tx).projects.update({
             where: {
                 id: project_id,
             },
@@ -149,12 +153,12 @@ export class ProjectRepository {
         return project;
     }
 
-    async enableProject(project_id: string) {
+    async enableProject(project_id: string, tx?: Prisma.TransactionClient) {
         if (!isValidUuid(project_id)) {
             this.logger.warn("ProjectRepository", "enableProject", `Invalid UUID format provided: ${project_id}`);
             return null;
         }
-        const project = await prisma.projects.update({
+        const project = await this.getClient(tx).projects.update({
             where: {
                 id: project_id,
             },
@@ -178,3 +182,4 @@ export class ProjectRepository {
         return project;
     }
 }
+

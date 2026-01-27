@@ -1,6 +1,7 @@
 import { prisma } from "../../lib/prisma";
+import { Prisma } from "@prisma/client";
 
-type CreateUserData = {
+export type CreateUserData = {
     username: string;
     email?: string;
     password_hash: string;
@@ -8,20 +9,24 @@ type CreateUserData = {
 }
 
 export class UserRepository {
-    async createUser(userData: CreateUserData) {
-        const user = await prisma.users.create({
+    private getClient(tx?: Prisma.TransactionClient) {
+        return tx || prisma;
+    }
+
+    async createUser(userData: CreateUserData, tx?: Prisma.TransactionClient) {
+        const user = await this.getClient(tx).users.create({
             data: userData,
         });
         return user;
     }
 
-    async getUsers() {
-        const users = await prisma.users.findMany();
+    async getUsers(tx?: Prisma.TransactionClient) {
+        const users = await this.getClient(tx).users.findMany();
         return users;
     }
 
-    async getUserById(id: string) {
-        const user = await prisma.users.findUnique({
+    async getUserById(id: string, tx?: Prisma.TransactionClient) {
+        const user = await this.getClient(tx).users.findUnique({
             where: {
                 id: id,
             },
@@ -29,8 +34,8 @@ export class UserRepository {
         return user;
     }
 
-    async getUsersByProjectId(project_id: string) {
-        const users = await prisma.users.findMany({
+    async getUsersByProjectId(project_id: string, tx?: Prisma.TransactionClient) {
+        const users = await this.getClient(tx).users.findMany({
             where: {
                 project_users: {
                     some: {
@@ -42,8 +47,17 @@ export class UserRepository {
         return users;
     }
 
-    async updateUser(id: string, userData: Partial<CreateUserData>) {
-        const user = await prisma.users.update({
+    async getUserByUsername(username: string, tx?: Prisma.TransactionClient) {
+        const user = await this.getClient(tx).users.findFirst({
+            where: {
+                username: username,
+            },
+        });
+        return user;
+    }
+
+    async updateUser(id: string, userData: Partial<CreateUserData>, tx?: Prisma.TransactionClient) {
+        const user = await this.getClient(tx).users.update({
             where: {
                 id: id,
             },
@@ -52,8 +66,8 @@ export class UserRepository {
         return user;
     }
 
-    async deleteUser(id: string) {
-        const user = await prisma.users.delete({
+    async deleteUser(id: string, tx?: Prisma.TransactionClient) {
+        const user = await this.getClient(tx).users.delete({
             where: {
                 id: id,
             },
@@ -61,3 +75,4 @@ export class UserRepository {
         return user;
     }
 }
+

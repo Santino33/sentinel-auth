@@ -1,6 +1,7 @@
 import { Logger } from "../../utils/logger";
 import { prisma } from "../../lib/prisma";
 import { isValidUuid } from "../../utils/validation";
+import { Prisma } from "@prisma/client";
 
 export type RoleEntity = {
     id: string;
@@ -20,8 +21,12 @@ export type UpdateRoleData = {
 export class RoleRepository {
     constructor(private logger: Logger) {}
 
-    async createRole(roleData: CreateRoleData) {
-        const role = await prisma.roles.create({
+    private getClient(tx?: Prisma.TransactionClient) {
+        return tx || prisma;
+    }
+
+    async createRole(roleData: CreateRoleData, tx?: Prisma.TransactionClient) {
+        const role = await this.getClient(tx).roles.create({
             data: roleData,
         });
         if (!role) {
@@ -32,8 +37,8 @@ export class RoleRepository {
         return role;
     }
 
-    async getRoles() {
-        const roles = await prisma.roles.findMany();
+    async getRoles(tx?: Prisma.TransactionClient) {
+        const roles = await this.getClient(tx).roles.findMany();
         if (!roles || roles.length === 0) {
             this.logger.warn("RoleRepository", "getRoles", "No roles found");
         } else {
@@ -42,12 +47,12 @@ export class RoleRepository {
         return roles;
     }
 
-    async getRoleById(id: string) {
+    async getRoleById(id: string, tx?: Prisma.TransactionClient) {
         if (!isValidUuid(id)) {
             this.logger.warn("RoleRepository", "getRoleById", `Invalid UUID format provided: ${id}`);
             return null;
         }
-        const role = await prisma.roles.findFirst({
+        const role = await this.getClient(tx).roles.findFirst({
             where: {
                 id: id,
             },
@@ -65,8 +70,8 @@ export class RoleRepository {
         return role;
     }
 
-    async getRoleByName(name: string) {
-        const role = await prisma.roles.findFirst({
+    async getRoleByName(name: string, tx?: Prisma.TransactionClient) {
+        const role = await this.getClient(tx).roles.findFirst({
             where: {
                 name: name,
             },
@@ -84,8 +89,8 @@ export class RoleRepository {
         return role;
     }
 
-    async getRolesByProjectId(projectId: string) {
-        const roles = await prisma.roles.findMany({
+    async getRolesByProjectId(projectId: string, tx?: Prisma.TransactionClient) {
+        const roles = await this.getClient(tx).roles.findMany({
             where: {
                 project_id: projectId,
             },
@@ -103,8 +108,8 @@ export class RoleRepository {
         return roles;
     }
 
-    async getRolesByIdAndProjectId(id: string, projectId: string) {
-        const role = await prisma.roles.findFirst({
+    async getRolesByIdAndProjectId(id: string, projectId: string, tx?: Prisma.TransactionClient) {
+        const role = await this.getClient(tx).roles.findFirst({
             where: {
                 id: id,
                 project_id: projectId,
@@ -123,12 +128,27 @@ export class RoleRepository {
         return role;
     }
 
-    async updateRole(id: string, roleData: UpdateRoleData) {
+    async getRoleByNameAndProjectId(name: string, projectId: string, tx?: Prisma.TransactionClient) {
+        const role = await this.getClient(tx).roles.findFirst({
+            where: {
+                name: name,
+                project_id: projectId,
+            },
+            select: {
+                id: true,
+                name: true,
+                project_id: true,
+            },
+        });
+        return role;
+    }
+
+    async updateRole(id: string, roleData: UpdateRoleData, tx?: Prisma.TransactionClient) {
         if (!isValidUuid(id)) {
             this.logger.warn("RoleRepository", "updateRole", `Invalid UUID format provided: ${id}`);
             return null;
         }
-        const role = await prisma.roles.update({
+        const role = await this.getClient(tx).roles.update({
             where: {
                 id: id,
             },
@@ -147,12 +167,12 @@ export class RoleRepository {
         return role;
     }
 
-    async deleteRole(id: string) {
+    async deleteRole(id: string, tx?: Prisma.TransactionClient) {
         if (!isValidUuid(id)) {
             this.logger.warn("RoleRepository", "deleteRole", `Invalid UUID format provided: ${id}`);
             return null;
         }
-        const role = await prisma.roles.delete({
+        const role = await this.getClient(tx).roles.delete({
             where: {
                 id: id,
             },
