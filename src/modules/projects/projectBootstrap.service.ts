@@ -1,7 +1,5 @@
 import { ProjectRepository } from "./project.repository";
-import { UserRepository } from "../users/user.repository";
-import { RoleRepository } from "../roles/role.repository";
-import { ProjectUserRepository } from "../../repositories/projectUser.repository";
+import { UserService } from "../users/user.service";
 import { prisma } from "../../lib/prisma";
 import { generateKey, generateHash } from "../../utils/keyGenerator";
 import { 
@@ -19,9 +17,7 @@ export type BootstrapProjectData = {
 export class ProjectBootstrapService {
     constructor(
         private projectRepository: ProjectRepository,
-        private userRepository: UserRepository,
-        private roleRepository: RoleRepository,
-        private projectUserRepository: ProjectUserRepository
+        private userService: UserService
     ) {}
 
     async bootstrapProject(data: BootstrapProjectData) {
@@ -48,34 +44,13 @@ export class ProjectBootstrapService {
                 updated_at: new Date(),
             }, tx);
 
-            // 4. Create bootstrap user (or get if already exists? requirement says creation)
-            // Let's check if user exists first
-            let user = await this.userRepository.getUserByUsername(username, tx);
-            if (!user) {
-                const passwordHash = await generateHash(password);
-                user = await this.userRepository.createUser({
-                    username,
-                    email,
-                    password_hash: passwordHash,
-                    is_active: true
-                }, tx);
-            }
-
-            // 5. Create or ensure role admin for this project
-            let adminRole = await this.roleRepository.getRoleByNameAndProjectId("admin", project.id, tx);
-            if (!adminRole) {
-                adminRole = await this.roleRepository.createRole({
-                    name: "admin",
-                    project_id: project.id
-                }, tx);
-            }
-
-            // 6. Link user to project with admin role
-            await this.projectUserRepository.createProjectUser({
-                project_id: project.id,
-                user_id: user.id,
-                role_id: adminRole.id,
-                is_active: true
+            // 4. Create bootstrap user and link to project (Atomic via UserService)
+            const user = await this.userService.ensureBootstrapUser({
+                username,
+                email,
+                password,
+                projectId: project.id,
+                roleName: "admin"
             }, tx);
 
             return {

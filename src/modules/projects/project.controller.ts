@@ -11,11 +11,12 @@ export class ProjectController {
     async createProject(req: Request, res: Response) {
         const { name, username, email, password } = req.body;
         
+
         const project = await this.projectBootstrapService.bootstrapProject({
             projectName: name,
             username: username || "admin", // Defaulting if not provided, but ideally required
             email: email || `${username || 'admin'}@example.com`,
-            passwordHash: password || "temp_password_hash", // Ideally hashed before
+            password: password || "temp_password_hash", // Ideally hashed before
         });
 
         return res.status(201).json(project);

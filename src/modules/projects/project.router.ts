@@ -6,8 +6,8 @@ import { ProjectService } from "./project.service";
 import { ProjectController } from "./project.controller";
 import { ProjectBootstrapService } from "./projectBootstrap.service";
 import { UserRepository } from "../users/user.repository";
+import { UserService } from "../users/user.service";
 import { RoleRepository } from "../roles/role.repository";
-import { UserRoleRepository } from "../../repositories/userRole.repository";
 import { ProjectUserRepository } from "../../repositories/projectUser.repository";
 import { requireBody, requireParams } from "../../middleware/validateRequest.middleware";
 
@@ -17,17 +17,14 @@ const router = Router();
 const projectRepository = new ProjectRepository(logger);
 const userRepository = new UserRepository();
 const roleRepository = new RoleRepository(logger);
-const userRoleRepository = new UserRoleRepository();
 const projectUserRepository = new ProjectUserRepository();
 
 // Services
+const userService = new UserService(userRepository, roleRepository, projectUserRepository);
 const projectService = new ProjectService(projectRepository);
 const projectBootstrapService = new ProjectBootstrapService(
     projectRepository,
-    userRepository,
-    roleRepository,
-    userRoleRepository,
-    projectUserRepository
+    userService
 );
 
 // Controller

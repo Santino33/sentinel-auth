@@ -10,13 +10,11 @@ const adminKeyRepository = new AdminKeyRepository(logger);
 
 export const adminAuth = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const authHeader = req.headers.authorization;
+    const providedKey = req.headers["x-admin-key"] as string;
 
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      throw new UnauthorizedError("Missing or invalid authorization header");
+    if (!providedKey) {
+      throw new UnauthorizedError("Missing x-admin-key header");
     }
-
-    const providedKey = authHeader.replace(/^Bearer\s+/i, "").trim();
     
     const adminKeys = await adminKeyRepository.getAdminKeys();
     let matchedKeyEntity = null;
