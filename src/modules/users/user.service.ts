@@ -51,9 +51,9 @@ export class UserService {
         if (!role) {
             // In a project context, usually roles should exist, 
             // but for flexible onboarding we might create it if it's the 'admin' role.
-            if (roleName === 'admin') {
+            if (roleName === 'admin' || roleName === 'ADMIN') {
                 role = await this.roleRepository.createRole({
-                    name: 'admin',
+                    name: 'ADMIN',
                     project_id: projectId
                 }, tx);
             } else {

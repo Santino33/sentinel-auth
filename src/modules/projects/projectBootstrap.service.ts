@@ -50,7 +50,7 @@ export class ProjectBootstrapService {
                 email,
                 password,
                 projectId: project.id,
-                roleName: "admin"
+                roleName: "ADMIN"
             }, tx);
 
             return {

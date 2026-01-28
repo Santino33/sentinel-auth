@@ -8,18 +8,13 @@ const router = Router();
 // Endpoint for user login
 router.post("/login", asyncHandler(async (req, res) => {
     const { email, password } = req.body;
+    const projectId = req.project?.id;
 
-    // TODO: Validate user credentials with UserService
-    // For now, this is a placeholder demonstration
-    const dummyUser = {
-        id: "user-uuid-123",
-        email: email || "admin@example.com",
-        password: password || "admin",
-        role: "ADMIN",
-        projectId: req.project?.id // If under /api, project is already attached by projectAuth
-    };
+    if (!projectId) {
+        return res.status(400).json({ error: "Project context is required (x-api-key)" });
+    }
 
-    const tokens = await authService.login(dummyUser);
+    const tokens = await authService.authenticate(email, password, projectId);
 
     res.status(200).json(tokens);
 }));

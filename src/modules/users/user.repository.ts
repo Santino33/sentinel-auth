@@ -56,6 +56,15 @@ export class UserRepository {
         return user;
     }
 
+    async getUserByEmail(email: string, tx?: Prisma.TransactionClient) {
+        const user = await this.getClient(tx).users.findFirst({
+            where: {
+                email: email,
+            },
+        });
+        return user;
+    }
+
     async updateUser(id: string, userData: Partial<CreateUserData>, tx?: Prisma.TransactionClient) {
         const user = await this.getClient(tx).users.update({
             where: {

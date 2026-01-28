@@ -16,4 +16,14 @@ export class AuthInvalidTokenError extends UnauthorizedError {
   constructor(message: string = "Invalid token") {
     super(message, "AUTH_INVALID_TOKEN");
   }
+}export class AuthInvalidCredentialsError extends UnauthorizedError {
+  constructor(message: string = "Invalid email or password") {
+    super(message, "AUTH_INVALID_CREDENTIALS");
+  }
+}
+
+export class AuthUserNotInProjectError extends UnauthorizedError {
+  constructor(message: string = "User does not have access to this project") {
+    super(message, "AUTH_USER_NOT_IN_PROJECT");
+  }
 }
