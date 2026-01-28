@@ -1,78 +1,43 @@
 import { prisma } from "../lib/prisma";
-
-type CreateUserRoleData = {
-    user_id: string;
-    role_id: string;
-}
+import { Prisma } from "@prisma/client";
 
 export class UserRoleRepository {
-    async createUserRole(userRoleData: CreateUserRoleData) {
-        const userRole = await prisma.user_roles.create({
-            data: userRoleData,
-        });
-        return userRole;
+    private getClient(tx?: Prisma.TransactionClient) {
+        return tx || prisma;
     }
 
-    async getUserRoles() {
-        const userRoles = await prisma.user_roles.findMany();
-        return userRoles;
-    }
-
-    async getUserRolesByUserId(user_id: string) {
-        const userRoles = await prisma.user_roles.findMany({
+    async assignRoleToUser(projectId: string, userId: string, roleId: string, tx?: Prisma.TransactionClient) {
+        // Since user_roles table was migrated to project_users, we use project_users
+        return (this.getClient(tx) as any).project_users.upsert({
             where: {
-                user_id: user_id,
+                project_id_user_id: {
+                    project_id: projectId,
+                    user_id: userId
+                }
             },
+            create: {
+                project_id: projectId,
+                user_id: userId,
+                role_id: roleId,
+                is_active: true
+            },
+            update: {
+                role_id: roleId
+            }
         });
-        return userRoles;
     }
 
-    async getUserRolesByRoleId(role_id: string) {
-        const userRoles = await prisma.user_roles.findMany({
+    async getUserRoleInProject(projectId: string, userId: string, tx?: Prisma.TransactionClient) {
+        return (this.getClient(tx) as any).project_users.findUnique({
             where: {
-                role_id: role_id,
+                project_id_user_id: {
+                    project_id: projectId,
+                    user_id: userId
+                }
             },
+            include: {
+                roles: true
+            }
         });
-        return userRoles;
-    }
-
-    // Retrieve a user role by its composite unique key (user_id + role_id)
-    async getUserRoleByCompositeKey(user_id: string, role_id: string) {
-        const userRole = await prisma.user_roles.findUnique({
-            where: {
-                user_id_role_id: {
-                    user_id: user_id,
-                    role_id: role_id,
-                },
-            },
-        });
-        return userRole;
-    }
-
-    // Update a user role using its composite unique key
-    async updateUserRoleByCompositeKey(user_id: string, role_id: string, userRoleData: CreateUserRoleData) {
-        const userRole = await prisma.user_roles.update({
-            where: {
-                user_id_role_id: {
-                    user_id: user_id,
-                    role_id: role_id,
-                },
-            },
-            data: userRoleData,
-        });
-        return userRole;
-    }
-
-    // Delete a user role using its composite unique key
-    async deleteUserRoleByCompositeKey(user_id: string, role_id: string) {
-        const userRole = await prisma.user_roles.delete({
-            where: {
-                user_id_role_id: {
-                    user_id: user_id,
-                    role_id: role_id,
-                },
-            },
-        });
-        return userRole;
     }
 }

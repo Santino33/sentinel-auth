@@ -11,13 +11,11 @@ const projectRepository = new ProjectRepository(logger);
 
 export const projectAuth = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const authHeader = req.headers.authorization;
+    const apiKey = req.headers["x-api-key"] as string;
 
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      throw new UnauthorizedError("Missing or invalid authorization header");
+    if (!apiKey) {
+      throw new UnauthorizedError("Missing x-api-key header");
     }
-
-    const apiKey = authHeader.replace(/^Bearer\s+/i, "").trim();
     
     const projects = await projectRepository.getProjects();
     let matchedKeyEntity = null;

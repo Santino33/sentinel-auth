@@ -12,25 +12,6 @@ import {
 export class ProjectService {
     constructor(private projectRepository: ProjectRepository) {}
 
-    async createProject(projectName: string) {
-        const projectRetrieved = await this.projectRepository.getProjectByName(projectName);
-        assertProjectName(projectName);
-        assertProjectNameIsNotRepeated(projectRetrieved?.name, projectName);
-        
-        const apiKey = await generateKey();
-        const hash = await generateHash(apiKey);
-        
-        const project = {
-            name: projectName,
-            api_key: hash,
-            is_active: true,
-            created_at: new Date(),
-            updated_at: new Date(),
-        }
-        
-        return this.projectRepository.createProject(project);
-    }
-
     async getProjects() {
         return this.projectRepository.getProjects();
     }

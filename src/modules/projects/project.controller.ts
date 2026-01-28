@@ -1,11 +1,24 @@
 import { ProjectService } from "./project.service";
+import { ProjectBootstrapService } from "./projectBootstrap.service";
 import { Request, Response } from "express";
 
 export class ProjectController {
-    constructor(private projectService: ProjectService) {}
+    constructor(
+        private projectService: ProjectService,
+        private projectBootstrapService: ProjectBootstrapService
+    ) {}
     
     async createProject(req: Request, res: Response) {
-        const project = await this.projectService.createProject(req.body.name);
+        const { name, username, email, password } = req.body;
+        
+
+        const project = await this.projectBootstrapService.bootstrapProject({
+            projectName: name,
+            username: username || "admin", // Defaulting if not provided, but ideally required
+            email: email || `${username || 'admin'}@example.com`,
+            password: password || "temp_password_hash", // Ideally hashed before
+        });
+
         return res.status(201).json(project);
     }
 

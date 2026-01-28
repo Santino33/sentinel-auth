@@ -4,6 +4,7 @@ import { projectAuth } from "../middleware/projectAuth.middleware";
 // If they don't exist, they should be created in their respective modules
 import userRouter from "../modules/users/user.router";
 import authRouter from "../modules/auth/auth.router";
+import roleRouter from "../modules/roles/role.router";
 
 const router = Router();
 
@@ -12,6 +13,7 @@ router.use(projectAuth);
 
 // Mount existing routers
 router.use("/users", userRouter);
+router.use("/roles", roleRouter);
 router.use("/auth", authRouter);
 
 export default router;
