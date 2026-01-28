@@ -1,4 +1,16 @@
-import { BadRequestError, NotFoundError, InternalServerError, ConflictError } from "./HttpError";
+import { BadRequestError, NotFoundError, InternalServerError, ConflictError, ForbiddenError, UnauthorizedError } from "./HttpError";
+
+export class RoleForbiddenError extends ForbiddenError {
+    constructor(message: string = "You do not have permission to access this resource") {
+        super(message, "ROLE_FORBIDDEN");
+    }
+}
+
+export class RoleUserNotAuthenticatedError extends UnauthorizedError {
+    constructor(message: string = "User not authenticated") {
+        super(message, "USER_NOT_AUTHENTICATED");
+    }
+}
 
 export class RoleNameIsRepeatedError extends ConflictError {
     constructor(message: string = "Role name is repeated") {

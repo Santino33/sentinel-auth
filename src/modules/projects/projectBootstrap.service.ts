@@ -1,7 +1,6 @@
 import { ProjectRepository } from "./project.repository";
 import { UserRepository } from "../users/user.repository";
 import { RoleRepository } from "../roles/role.repository";
-import { UserRoleRepository } from "../../repositories/userRole.repository";
 import { ProjectUserRepository } from "../../repositories/projectUser.repository";
 import { prisma } from "../../lib/prisma";
 import { generateKey, generateHash } from "../../utils/keyGenerator";
@@ -14,7 +13,7 @@ export type BootstrapProjectData = {
     projectName: string;
     username: string;
     email: string;
-    passwordHash: string;
+    password: string;
 }
 
 export class ProjectBootstrapService {
@@ -22,12 +21,11 @@ export class ProjectBootstrapService {
         private projectRepository: ProjectRepository,
         private userRepository: UserRepository,
         private roleRepository: RoleRepository,
-        private userRoleRepository: UserRoleRepository,
         private projectUserRepository: ProjectUserRepository
     ) {}
 
     async bootstrapProject(data: BootstrapProjectData) {
-        const { projectName, username, email, passwordHash } = data;
+        const { projectName, username, email, password } = data;
 
         // 1. Validation (Business logic before transaction if possible, or inside)
         assertProjectName(projectName);
@@ -54,6 +52,7 @@ export class ProjectBootstrapService {
             // Let's check if user exists first
             let user = await this.userRepository.getUserByUsername(username, tx);
             if (!user) {
+                const passwordHash = await generateHash(password);
                 user = await this.userRepository.createUser({
                     username,
                     email,
