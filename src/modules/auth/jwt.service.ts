@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken';
-import { JwtPayload } from './auth.types';
+import { JwtPayload } from '../auth/auth.types';
 
 export class JwtService {
   private readonly secret: string;
@@ -38,6 +38,8 @@ export class JwtService {
       throw new Error('INVALID_TOKEN');
     }
   }
+
+  
 
   /**
    * Decodes a token without verifying the signature.
