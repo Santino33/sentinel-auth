@@ -2,6 +2,13 @@ import { ResetCodeEntity } from "./password_reset.types";
 import { ResetCodeExpiredError, ResetCodeNotFoundError, ResetCodeAlreadyUsedError, ResetCodeInvalidError } from "../../errors/ResetError";
 import { BadRequestError } from "../../errors/HttpError";
 
+export function assertEmailFormat(email: string): void {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!email || !emailRegex.test(email)) {
+    throw new BadRequestError("Invalid email format");
+  }
+}
+
 export function assertResetCode(code: string): void {
   if (!code || typeof code !== 'string' || code.length !== 8 || !/^\d+$/.test(code)) {
     throw new ResetCodeInvalidError();

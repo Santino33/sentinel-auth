@@ -3,7 +3,7 @@ import { RoleRepository } from "../roles/role.repository";
 import { ProjectUserRepository } from "../../repositories/projectUser.repository";
 import { Prisma } from "@prisma/client";
 import { generateHash } from "../../utils/keyGenerator";
-import { assertUserDoesNotExists } from "./user.guards";
+import { assertUserDoesNotExists, assertEmailIsUnique } from "./user.guards";
 import { RoleNotFoundError } from "../../errors/RoleError";
 
 export interface CreateProjectUserData {
@@ -29,10 +29,11 @@ export class UserService {
         const { username, email, password, projectId, roleName } = data;
 
         // 1. Check if user already exists
-        // Note: In some cases (bootstrap), the user might already exist, 
-        // but for a clean creation via API, we should validate.
-        const existingUser = await this.userRepository.getUserByUsername(username, tx);
-        assertUserDoesNotExists(existingUser, username);
+        const existingUserByName = await this.userRepository.getUserByUsername(username, tx);
+        assertUserDoesNotExists(existingUserByName, username);
+
+        const existingUserByEmail = await this.userRepository.getUserByEmail(email, tx);
+        assertEmailIsUnique(existingUserByEmail, email);
 
         // 2. Hash password
         const passwordHash = await generateHash(password);
@@ -81,13 +82,19 @@ export class UserService {
         let user = await this.userRepository.getUserByUsername(username, tx);
         
         if (!user) {
-            const passwordHash = await generateHash(password);
-            user = await this.userRepository.createUser({
-                username,
-                email,
-                password_hash: passwordHash,
-                is_active: true
-            }, tx);
+            // Also check by email to avoid unique constraint violations
+            const existingByEmail = await this.userRepository.getUserByEmail(email, tx);
+            if (existingByEmail) {
+                user = existingByEmail;
+            } else {
+                const passwordHash = await generateHash(password);
+                user = await this.userRepository.createUser({
+                    username,
+                    email,
+                    password_hash: passwordHash,
+                    is_active: true
+                }, tx);
+            }
         }
 
         let role = await this.roleRepository.getRoleByNameAndProjectId(roleName, projectId, tx);

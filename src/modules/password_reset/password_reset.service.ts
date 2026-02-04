@@ -1,4 +1,5 @@
-import { ResetCodeRepository } from "../../repositories/resetCode.repository";
+import crypto from "crypto";
+import { ResetCodeRepository } from "./resetCode.repository";
 import { UserRepository } from "../../modules/users/user.repository";
 import { RefreshTokenRepository } from "../../modules/auth/refreshToken.repository";
 import { EmailService, NodemailerEmailService } from "../../lib/email.service";
@@ -55,7 +56,7 @@ export class PasswordResetService {
       expires_at: expiresAt
     });
 
-    await this.emailService.sendPasswordResetEmail(email, code);
+    await this.emailService.sendPasswordResetEmail(email, code, this.RESET_CODE_EXPIRY_HOURS);
   }
 
   async resetPassword(email: string, code: string, newPassword: string): Promise<void> {
@@ -84,6 +85,6 @@ export class PasswordResetService {
   }
 
   private generateResetCode(): string {
-    return Math.floor(10000000 + Math.random() * 90000000).toString();
+    return crypto.randomInt(10000000, 99999999).toString();
   }
 }

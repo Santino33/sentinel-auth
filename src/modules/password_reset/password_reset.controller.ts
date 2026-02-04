@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { PasswordResetService } from "./password_reset.service";
+import { assertEmailFormat } from "./password_reset.guards";
 
 export class PasswordResetController {
   constructor(private readonly passwordResetService: PasswordResetService) {}
@@ -15,6 +16,8 @@ export class PasswordResetController {
       });
       return;
     }
+
+    assertEmailFormat(email);
 
     await this.passwordResetService.requestResetCode(email);
 
@@ -34,6 +37,8 @@ export class PasswordResetController {
       });
       return;
     }
+
+    assertEmailFormat(email);
 
     await this.passwordResetService.resetPassword(email, code, newPassword);
 
