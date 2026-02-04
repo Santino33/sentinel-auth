@@ -9,6 +9,7 @@ import { UserRepository } from "../users/user.repository";
 import { UserService } from "../users/user.service";
 import { RoleRepository } from "../roles/role.repository";
 import { ProjectUserRepository } from "../../repositories/projectUser.repository";
+import { RefreshTokenRepository } from "../auth/refreshToken.repository";
 import { requireBody, requireParams } from "../../middleware/validateRequest.middleware";
 
 const router = Router();
@@ -18,9 +19,10 @@ const projectRepository = new ProjectRepository(logger);
 const userRepository = new UserRepository();
 const roleRepository = new RoleRepository(logger);
 const projectUserRepository = new ProjectUserRepository();
+const refreshTokenRepository = new RefreshTokenRepository();
 
 // Services
-const userService = new UserService(userRepository, roleRepository, projectUserRepository);
+const userService = new UserService(userRepository, roleRepository, projectUserRepository, refreshTokenRepository);
 const projectService = new ProjectService(projectRepository);
 const projectBootstrapService = new ProjectBootstrapService(
     projectRepository,

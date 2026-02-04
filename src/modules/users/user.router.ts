@@ -6,6 +6,7 @@ import { UserService } from "./user.service";
 import { UserRepository } from "./user.repository";
 import { RoleRepository } from "../roles/role.repository";
 import { ProjectUserRepository } from "../../repositories/projectUser.repository";
+import { RefreshTokenRepository } from "../auth/refreshToken.repository";
 import { logger } from "../../utils/logger";
 
 const router = Router();
@@ -14,9 +15,10 @@ const router = Router();
 const userRepository = new UserRepository();
 const roleRepository = new RoleRepository(logger);
 const projectUserRepository = new ProjectUserRepository();
+const refreshTokenRepository = new RefreshTokenRepository();
 
 // Services
-const userService = new UserService(userRepository, roleRepository, projectUserRepository);
+const userService = new UserService(userRepository, roleRepository, projectUserRepository, refreshTokenRepository);
 
 // Controller
 const userController = new UserController(userService);
