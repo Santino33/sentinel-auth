@@ -6,8 +6,7 @@ import { Prisma } from "@prisma/client";
 import { generateHash } from "../../utils/keyGenerator";
 import { prisma } from "../../lib/prisma";
 import { assertUserDoesNotExists, assertEmailIsUnique } from "./user.guards";
-import { assertCurrentPassword, assertNewPasswordDifferent } from "../auth/auth.guards";
-import { assertPasswordStrength } from "../password_reset/password_reset.guards";
+import { assertCurrentPassword, assertNewPasswordDifferent, assertPasswordStrength } from "../../guards/password.guards";
 import { UserNotFoundError } from "../../errors/UserError";
 import { RoleNotFoundError } from "../../errors/RoleError";
 
