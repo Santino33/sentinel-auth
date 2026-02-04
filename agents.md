@@ -88,54 +88,42 @@ The project currently uses script-based integration tests located in the `test/`
 
 The following features are missing for a production-ready authentication service:
 
-### Priority 1: Password Reset Flow (CRITICAL)
+### Priority 1: User Account Management
 
-**Current State:**
-- Database table `password_reset_codes` exists
-- Repository `resetCode.repository.ts` exists
-- **NO service, controller, or router for password reset**
+| Missing Feature | Impact | Description |
+|----------------|--------|-------------|
+| Change password | HIGH | Users cannot update credentials while logged in |
+| Email verification | HIGH | No email ownership confirmation |
+| User deactivation | MEDIUM | Soft delete for users |
+| User deletion | MEDIUM | Permanent account removal |
 
-**Missing Components:**
-- `password_reset.service.ts` - Logic for code generation/validation
-- `password_reset.controller.ts` - HTTP handlers
-- `password_reset.router.ts` - API endpoints
-- EmailService (abstraction) - To send reset emails
-
-**Required Endpoints:**
-- `POST /auth/forgot-password` - Request password reset
-- `POST /auth/reset-password` - Validate code, reset password
-
-### Priority 2: User Account Management
-
-| Missing Feature | Impact |
-|----------------|--------|
-| Change password | Users cannot update credentials |
-| Email verification | No email ownership confirmation |
-| User deactivation | Soft delete for users |
-| User deletion | Permanent account removal |
-
-### Priority 3: Security Enhancements
+### Priority 2: Security Enhancements
 
 | Missing Feature | Risk Level | Description |
 |-----------------|------------|-------------|
-| Password strength policy | HIGH | No validation of password complexity |
 | Rate limiting | HIGH | No brute-force protection |
 | Audit logging | MEDIUM | Auth events not logged comprehensively |
 | Login attempt tracking | MEDIUM | No failed login monitoring |
 
-### Priority 4: Session Management
+### Priority 3: Session Management
 
 | Missing Feature | Description |
 |----------------|-------------|
 | Active sessions list | Users cannot see logged-in devices |
 | Single session enforcement | No "logout from all devices" |
-| Per-device token invalidation | Cannot revoke specific sessions |
 | Session timeout | No inactivity-based logout |
+
+### ✅ Completed Features
+
+| Feature | Status | Notes |
+|---------|--------|-------|
+| Password Reset Flow | ✅ Complete | Full implementation with email service, guards, controller, and router |
+| Password Strength Policy | ✅ Complete | Validates 8+ chars, uppercase, lowercase, numbers |
 
 ### Recommended Next Feature
 
-Implement the **Password Reset Flow** because:
-1. **Infrastructure exists** - Repository and schema table already created
-2. **Security critical** - Without it, users cannot recover accounts
-3. **Clear scope** - Defined start/end points
-4. **Enables other features** - Foundation for email verification
+Implement **Change Password** because:
+1. **User-initiated**: Users can proactively update credentials while authenticated
+2. **Security critical**: Enables password rotation without account recovery
+3. **Complements Reset**: Provides complete credential management
+4. **Clear scope**: Straightforward implementation (1-2 endpoints)

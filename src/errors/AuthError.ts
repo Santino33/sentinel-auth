@@ -16,7 +16,15 @@ export class AuthInvalidTokenError extends UnauthorizedError {
   constructor(message: string = "Invalid token") {
     super(message, "AUTH_INVALID_TOKEN");
   }
-}export class AuthInvalidCredentialsError extends UnauthorizedError {
+}
+
+export class AuthWrongPasswordError extends UnauthorizedError {
+  constructor(message: string = "Current password is incorrect") {
+    super(message, "AUTH_WRONG_PASSWORD");
+  }
+}
+
+export class AuthInvalidCredentialsError extends UnauthorizedError {
   constructor(message: string = "Invalid email or password") {
     super(message, "AUTH_INVALID_CREDENTIALS");
   }

@@ -1,6 +1,7 @@
 import { ResetCodeEntity } from "./password_reset.types";
 import { ResetCodeExpiredError, ResetCodeNotFoundError, ResetCodeAlreadyUsedError, ResetCodeInvalidError } from "../../errors/ResetError";
 import { BadRequestError } from "../../errors/HttpError";
+import { assertPasswordStrength } from "../../guards/password.guards";
 
 export function assertEmailFormat(email: string): void {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -15,31 +16,7 @@ export function assertResetCode(code: string): void {
   }
 }
 
-export function assertPasswordStrength(password: string): void {
-  const minLength = 8;
-  const hasUppercase = /[A-Z]/.test(password);
-  const hasLowercase = /[a-z]/.test(password);
-  const hasNumber = /[0-9]/.test(password);
-
-  const errors: string[] = [];
-
-  if (password.length < minLength) {
-    errors.push(`Password must be at least ${minLength} characters`);
-  }
-  if (!hasUppercase) {
-    errors.push("Password must contain at least one uppercase letter");
-  }
-  if (!hasLowercase) {
-    errors.push("Password must contain at least one lowercase letter");
-  }
-  if (!hasNumber) {
-    errors.push("Password must contain at least one number");
-  }
-
-  if (errors.length > 0) {
-    throw new BadRequestError(errors.join(". "));
-  }
-}
+export { assertPasswordStrength };
 
 export function assertResetCodeExists(code: ResetCodeEntity | null | undefined): asserts code is ResetCodeEntity {
   if (!code) {

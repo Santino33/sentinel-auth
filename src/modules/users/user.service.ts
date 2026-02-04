@@ -1,9 +1,13 @@
 import { UserRepository } from "./user.repository";
 import { RoleRepository } from "../roles/role.repository";
 import { ProjectUserRepository } from "../../repositories/projectUser.repository";
+import { RefreshTokenRepository } from "../auth/refreshToken.repository";
 import { Prisma } from "@prisma/client";
 import { generateHash } from "../../utils/keyGenerator";
+import { prisma } from "../../lib/prisma";
 import { assertUserDoesNotExists, assertEmailIsUnique } from "./user.guards";
+import { assertCurrentPassword, assertNewPasswordDifferent, assertPasswordStrength } from "../../guards/password.guards";
+import { UserNotFoundError } from "../../errors/UserError";
 import { RoleNotFoundError } from "../../errors/RoleError";
 
 export interface CreateProjectUserData {
@@ -18,7 +22,8 @@ export class UserService {
     constructor(
         private userRepository: UserRepository,
         private roleRepository: RoleRepository,
-        private projectUserRepository: ProjectUserRepository
+        private projectUserRepository: ProjectUserRepository,
+        private refreshTokenRepository: RefreshTokenRepository
     ) {}
 
     /**
@@ -105,7 +110,7 @@ export class UserService {
             }, tx);
         }
 
-        await this.projectUserRepository.createProjectUser({
+await this.projectUserRepository.createProjectUser({
             project_id: projectId,
             user_id: user.id,
             role_id: role.id,
@@ -113,5 +118,27 @@ export class UserService {
         }, tx);
 
         return user;
+    }
+
+    async changePassword(
+        userId: string,
+        currentPassword: string,
+        newPassword: string
+    ): Promise<void> {
+        const user = await this.userRepository.getUserById(userId);
+        if (!user) {
+            throw new UserNotFoundError(`User with id '${userId}' not found`);
+        }
+
+        await assertCurrentPassword(currentPassword, user.password_hash);
+        assertNewPasswordDifferent(currentPassword, newPassword);
+        assertPasswordStrength(newPassword);
+
+        const newPasswordHash = await generateHash(newPassword);
+
+        await prisma.$transaction(async (tx) => {
+            await this.userRepository.updateUser(userId, { password_hash: newPasswordHash }, tx);
+            await this.refreshTokenRepository.deleteByUserId(userId, tx);
+        });
     }
 }

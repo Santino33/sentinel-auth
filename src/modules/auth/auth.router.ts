@@ -3,8 +3,10 @@ import { authService } from "./auth.module";
 import { authGuard } from "./auth.guard";
 import { asyncHandler } from "../../utils/asyncHandler";
 import passwordResetRouter from "../password_reset/password_reset.router";
+import { AuthController } from "./auth.controller";
 
 const router = Router();
+const authController = new AuthController();
 
 router.post("/login", asyncHandler(async (req, res) => {
     const { email, password } = req.body;
@@ -37,6 +39,10 @@ router.get("/me", authGuard, asyncHandler(async (req, res) => {
         user: req.user,
         project: req.project
     });
+}));
+
+router.post("/change-password", authGuard, asyncHandler(async (req, res) => {
+    await authController.changePassword(req, res);
 }));
 
 router.use("/password-reset", passwordResetRouter);

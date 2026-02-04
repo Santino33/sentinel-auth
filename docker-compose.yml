@@ -19,6 +19,12 @@ services:
     networks:
       - sentinel-network
 
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
   sentinel-back:
     build: .
     container_name: sentinel-back
@@ -33,7 +39,24 @@ services:
       - DATABASE_URL=postgresql://postgres:root@postgres:5432/sentinel?schema=public
       - PORT=3000
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
+    networks:
+      - sentinel-network
+
+  test-runner:
+    build: .
+    container_name: sentinel-tests
+    env_file: .env
+    environment:
+      - DATABASE_URL=postgresql://postgres:root@postgres:5432/sentinel?schema=public
+      - PORT=3000
+      - TEST_BASE_URL=http://sentinel-back:3000/api
+    depends_on:
+      sentinel-back:
+        condition: service_started
+    command: >
+      sh -c "sleep 10 && npx ts-node test/login/test-change-password.ts"
     networks:
       - sentinel-network
 
