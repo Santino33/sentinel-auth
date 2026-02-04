@@ -4,6 +4,7 @@ import { ProjectUserRepository } from "../../repositories/projectUser.repository
 import { RefreshTokenRepository } from "../auth/refreshToken.repository";
 import { Prisma } from "@prisma/client";
 import { generateHash } from "../../utils/keyGenerator";
+import { prisma } from "../../lib/prisma";
 import { assertUserDoesNotExists, assertEmailIsUnique } from "./user.guards";
 import { assertCurrentPassword, assertNewPasswordDifferent } from "../auth/auth.guards";
 import { assertPasswordStrength } from "../password_reset/password_reset.guards";
@@ -136,6 +137,9 @@ await this.projectUserRepository.createProjectUser({
 
         const newPasswordHash = await generateHash(newPassword);
 
-        await this.userRepository.updateUser(userId, { password_hash: newPasswordHash });
+        await prisma.$transaction(async (tx) => {
+            await this.userRepository.updateUser(userId, { password_hash: newPasswordHash }, tx);
+            await this.refreshTokenRepository.deleteByUserId(userId, tx);
+        });
     }
 }
