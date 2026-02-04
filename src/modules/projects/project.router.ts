@@ -5,31 +5,18 @@ import { ProjectRepository } from "./project.repository";
 import { ProjectService } from "./project.service";
 import { ProjectController } from "./project.controller";
 import { ProjectBootstrapService } from "./projectBootstrap.service";
-import { UserRepository } from "../users/user.repository";
-import { UserService } from "../users/user.service";
-import { RoleRepository } from "../roles/role.repository";
-import { ProjectUserRepository } from "../../repositories/projectUser.repository";
-import { RefreshTokenRepository } from "../auth/refreshToken.repository";
+import { userService } from "../users/user.module";
 import { requireBody, requireParams } from "../../middleware/validateRequest.middleware";
 
 const router = Router();
 
-// Repositories
 const projectRepository = new ProjectRepository(logger);
-const userRepository = new UserRepository();
-const roleRepository = new RoleRepository(logger);
-const projectUserRepository = new ProjectUserRepository();
-const refreshTokenRepository = new RefreshTokenRepository();
-
-// Services
-const userService = new UserService(userRepository, roleRepository, projectUserRepository, refreshTokenRepository);
 const projectService = new ProjectService(projectRepository);
 const projectBootstrapService = new ProjectBootstrapService(
     projectRepository,
     userService
 );
 
-// Controller
 const projectController = new ProjectController(projectService, projectBootstrapService);
 
 router.post("/", requireBody, asyncHandler((req, res) => projectController.createProject(req, res)));

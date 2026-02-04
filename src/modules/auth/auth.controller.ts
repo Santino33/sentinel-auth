@@ -1,23 +1,7 @@
 import { Request, Response } from "express";
-import { UserService } from "../users/user.service";
-import { RoleRepository } from "../roles/role.repository";
-import { ProjectUserRepository } from "../../repositories/projectUser.repository";
-import { RefreshTokenRepository } from "./refreshToken.repository";
-import { UserRepository } from "../users/user.repository";
-import { logger } from "../../utils/logger";
+import { userService } from "../users/user.module";
 
 export class AuthController {
-    private userService: UserService;
-
-    constructor() {
-        this.userService = new UserService(
-            new UserRepository(),
-            new RoleRepository(logger),
-            new ProjectUserRepository(),
-            new RefreshTokenRepository()
-        );
-    }
-
     async changePassword(req: Request, res: Response): Promise<void> {
         const { currentPassword, newPassword } = req.body;
         const userId = req.user?.id;
@@ -40,14 +24,10 @@ export class AuthController {
             return;
         }
 
-        try {
-            await this.userService.changePassword(userId, currentPassword, newPassword);
+        await userService.changePassword(userId, currentPassword, newPassword);
 
-            res.status(200).json({
-                message: "Password changed successfully"
-            });
-        } catch (error) {
-            throw error;
-        }
+        res.status(200).json({
+            message: "Password changed successfully"
+        });
     }
 }
