@@ -3,6 +3,7 @@ import { authService } from "./auth.module";
 import { authGuard } from "./auth.guard";
 import { asyncHandler } from "../../utils/asyncHandler";
 import passwordResetRouter from "../password_reset/password_reset.router";
+import emailVerificationRouter from "../email_verification/emailVerification.router";
 import { AuthController } from "./auth.controller";
 
 const router = Router();
@@ -46,5 +47,6 @@ router.post("/change-password", authGuard, asyncHandler(async (req, res) => {
 }));
 
 router.use("/password-reset", passwordResetRouter);
+router.use("/email-verification", emailVerificationRouter);
 
 export default router;

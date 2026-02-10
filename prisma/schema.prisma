@@ -76,17 +76,21 @@ model project_users {
 }
 
 model users {
-  id                   String                 @id @default(uuid()) @db.Uuid
-  username             String                 @db.VarChar(100)
-  email                String?                @db.VarChar(150)
-  password_hash        String                 @db.VarChar(255)
-  is_active            Boolean?               @default(true)
-  created_at           DateTime               @default(now()) @db.Timestamp(6)
-  updated_at           DateTime?              @db.Timestamp(6)
-  password_reset_codes password_reset_codes[]
-  refresh_tokens       refresh_tokens[]
-  project_users        project_users[]
+  id                    String                 @id @default(uuid()) @db.Uuid
+  username              String                 @db.VarChar(100)
+  email                 String?                @db.VarChar(150)
+  password_hash         String                 @db.VarChar(255)
+  is_active             Boolean?               @default(true)
+  email_verified        Boolean?               @default(false)
+  verification_code     String?                @db.VarChar(10)
+  verification_expires_at DateTime?           @db.Timestamp(6)
+  created_at            DateTime               @default(now()) @db.Timestamp(6)
+  updated_at            DateTime?              @db.Timestamp(6)
+  password_reset_codes  password_reset_codes[]
+  refresh_tokens        refresh_tokens[]
+  project_users         project_users[]
 
   @@unique([username], map: "uq_user_username")
   @@unique([email], map: "uq_user_email")
+  @@index([email, email_verified], map: "idx_users_email_verified")
 }

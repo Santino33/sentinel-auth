@@ -2,13 +2,15 @@ import { UserRepository } from "./user.repository";
 import { RoleRepository } from "../roles/role.repository";
 import { ProjectUserRepository } from "../../repositories/projectUser.repository";
 import { RefreshTokenRepository } from "../auth/refreshToken.repository";
-import { Prisma } from "@prisma/client";
+import { Prisma, users } from "@prisma/client";
 import { generateHash } from "../../utils/keyGenerator";
 import { prisma } from "../../lib/prisma";
 import { assertUserDoesNotExists, assertEmailIsUnique } from "./user.guards";
 import { assertCurrentPassword, assertNewPasswordDifferent, assertPasswordStrength } from "../../guards/password.guards";
 import { UserNotFoundError } from "../../errors/UserError";
 import { RoleNotFoundError } from "../../errors/RoleError";
+import crypto from "crypto";
+import { EmailService, NodemailerEmailService } from "../../lib/email.service";
 
 export interface CreateProjectUserData {
     username: string;
@@ -19,12 +21,44 @@ export interface CreateProjectUserData {
 }
 
 export class UserService {
+    private readonly VERIFICATION_CODE_EXPIRY_HOURS = 24;
+    private readonly emailService: EmailService;
+
     constructor(
         private userRepository: UserRepository,
         private roleRepository: RoleRepository,
         private projectUserRepository: ProjectUserRepository,
         private refreshTokenRepository: RefreshTokenRepository
-    ) {}
+    ) {
+        if (process.env.SMTP_HOST) {
+            this.emailService = new NodemailerEmailService();
+        } else {
+            this.emailService = {
+                async sendPasswordResetEmail(): Promise<void> {},
+                async sendVerificationEmail(email: string, code: string): Promise<void> {
+                    console.log(`[MOCK EMAIL] Verification - To: ${email} | Code: ${code}`);
+                }
+            } as EmailService;
+        }
+    }
+
+    private generateVerificationCode(): string {
+        return crypto.randomInt(10000000, 99999999).toString();
+    }
+
+    private async createVerificationForUser(user: users, tx?: Prisma.TransactionClient) {
+        if (!user.email) {
+            return;
+        }
+
+        const code = this.generateVerificationCode();
+        const expiresAt = new Date();
+        expiresAt.setHours(expiresAt.getHours() + this.VERIFICATION_CODE_EXPIRY_HOURS);
+
+        await this.userRepository.updateVerificationCode(user.id, code, expiresAt, tx);
+
+        await this.emailService.sendVerificationEmail(user.email, code, this.VERIFICATION_CODE_EXPIRY_HOURS);
+    }
 
     /**
      * Creates a user, secures their password, and links them to a project with a specific role.
@@ -75,6 +109,9 @@ export class UserService {
             is_active: true
         }, tx);
 
+        // 6. Generate verification code and send email
+        await this.createVerificationForUser(user, tx);
+
         return user;
     }
 
@@ -99,6 +136,8 @@ export class UserService {
                     password_hash: passwordHash,
                     is_active: true
                 }, tx);
+
+                await this.createVerificationForUser(user, tx);
             }
         }
 

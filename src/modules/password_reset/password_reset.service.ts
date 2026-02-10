@@ -22,11 +22,18 @@ export class PasswordResetService {
     const resetCodeRepository = new ResetCodeRepository();
     const userRepository = new UserRepository();
     const refreshTokenRepository = new RefreshTokenRepository();
-    const emailService = process.env.SMTP_HOST ? new NodemailerEmailService() as EmailService : {
-      async sendPasswordResetEmail(email: string, code: string): Promise<void> {
-        console.log(`[MOCK EMAIL] To: ${email} | Code: ${code}`);
-      }
-    };
+    let emailService: EmailService;
+
+    if (process.env.SMTP_HOST) {
+      emailService = new NodemailerEmailService();
+    } else {
+      emailService = {
+        async sendPasswordResetEmail(email: string, code: string): Promise<void> {
+          console.log(`[MOCK EMAIL] To: ${email} | Code: ${code}`);
+        },
+        async sendVerificationEmail(): Promise<void> {}
+      };
+    }
 
     return new PasswordResetService(
       resetCodeRepository,

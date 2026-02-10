@@ -2,6 +2,7 @@ import express from "express";
 import dotenv from "dotenv";
 import adminContextRouter from "./routes/admin.routes";
 import projectContextRouter from "./routes/project.routes";
+import emailVerificationRouter from "./modules/email_verification/emailVerification.router";
 import { bootstrap } from "./utils/bootstrap";
 import { errorHandler } from "./middleware/errorHandler";
 
@@ -20,7 +21,10 @@ const start = async () => {
         res.status(200).json({ status: "ok", timestamp: new Date().toISOString() });
     });
 
-    // Context-based Routing
+    // Public email verification endpoints (no x-api-key required)
+    app.use("/api/auth/email-verification", emailVerificationRouter);
+
+    // Context-based Routing (requires x-api-key)
     app.use("/api/admin", adminContextRouter);
     app.use("/api", projectContextRouter);
 

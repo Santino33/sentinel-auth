@@ -23,3 +23,21 @@ export class UserPasswordRequiredError extends BadRequestError {
         super(message, "USER_PASSWORD_REQUIRED");
     }
 }
+
+export class UserEmailNotVerifiedError extends BadRequestError {
+    constructor(message: string = "User email is not verified") {
+        super(message, "USER_EMAIL_NOT_VERIFIED");
+    }
+}
+
+export class VerificationCodeInvalidError extends BadRequestError {
+    constructor(message: string = "Invalid verification code") {
+        super(message, "VERIFICATION_CODE_INVALID");
+    }
+}
+
+export class VerificationCodeExpiredError extends BadRequestError {
+    constructor(message: string = "Verification code has expired") {
+        super(message, "VERIFICATION_CODE_EXPIRED");
+    }
+}

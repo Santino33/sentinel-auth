@@ -9,6 +9,7 @@ import {
   AuthUserNotInProjectError,
   AuthInvalidTokenError
 } from '../../errors/AuthError';
+import { UserEmailNotVerifiedError } from '../../errors/UserError';
 
 export class AuthService {
   constructor(
@@ -30,6 +31,10 @@ export class AuthService {
     const isPasswordValid = await verifyKey(password, user.password_hash);
     if (!isPasswordValid) {
       throw new AuthInvalidCredentialsError();
+    }
+
+    if (!user.email_verified) {
+      throw new UserEmailNotVerifiedError();
     }
 
     const projectUsers = await this.projectUserRepository.getProjectUsersByUserId(user.id);
