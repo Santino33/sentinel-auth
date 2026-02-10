@@ -83,5 +83,55 @@ export class UserRepository {
         });
         return user;
     }
+
+    async getUserByEmailUnverified(email: string, tx?: Prisma.TransactionClient) {
+        const user = await this.getClient(tx).users.findFirst({
+            where: {
+                email: email,
+                email_verified: false
+            },
+        });
+        return user;
+    }
+
+    async updateVerificationCode(
+        id: string,
+        code: string,
+        expiresAt: Date,
+        tx?: Prisma.TransactionClient
+    ) {
+        const user = await this.getClient(tx).users.update({
+            where: { id },
+            data: {
+                verification_code: code,
+                verification_expires_at: expiresAt
+            },
+        });
+        return user;
+    }
+
+    async verifyEmail(id: string, tx?: Prisma.TransactionClient) {
+        const user = await this.getClient(tx).users.update({
+            where: { id },
+            data: {
+                email_verified: true,
+                verification_code: null,
+                verification_expires_at: null
+            },
+        });
+        return user;
+    }
+
+    async findValidVerificationCode(email: string, code: string, tx?: Prisma.TransactionClient) {
+        const user = await this.getClient(tx).users.findFirst({
+            where: {
+                email: email,
+                verification_code: code,
+                verification_expires_at: { gt: new Date() },
+                email_verified: false
+            },
+        });
+        return user;
+    }
 }
 
