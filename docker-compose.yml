@@ -44,59 +44,6 @@ services:
     networks:
       - sentinel-network
 
-  test-runner:
-    build: .
-    container_name: sentinel-tests
-    env_file: .env
-    environment:
-      - DATABASE_URL=postgresql://postgres:root@postgres:5432/sentinel?schema=public
-      - PORT=3000
-      - TEST_BASE_URL=http://sentinel-back:3000/api
-      - ADMIN_KEY=c228119cce0fe5a5737616104e0ae70b8b7fe37c5c4bed1748e1b83c533b34b5
-    depends_on:
-      sentinel-back:
-        condition: service_started
-    command: >
-      sh -c "sleep 10 && npx ts-node test/login/test-change-password.ts"
-    networks:
-      - sentinel-network
-
-  test-email-verification:
-    build: .
-    container_name: sentinel-email-verification-tests
-    env_file: .env
-    environment:
-      - DATABASE_URL=postgresql://postgres:root@postgres:5432/sentinel?schema=public
-      - PORT=3000
-      - TEST_BASE_URL=http://sentinel-back:3000/api
-      - RUNNING_IN_DOCKER=true
-    depends_on:
-      sentinel-back:
-        condition: service_started
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    command: >
-      sh -c "sleep 10 && ADMIN_KEY=$$(docker exec sentinel-back cat /proc/1/cmdline 2>/dev/null | tr '\\0' ' ' | grep -o 'ADMIN_KEY=[a-f0-9]*' | head -1 | cut -d= -f2 || docker logs sentinel-back 2>&1 | grep -o 'ADMIN_KEY=[a-f0-9]*' | head -1 | cut -d= -f2) && echo 'Admin key: $ADMIN_KEY' && npx ts-node --transpile-only test/email-verification/test-email-verification.ts"
-    networks:
-      - sentinel-network
-
-  test-email-verification-db:
-    build: .
-    container_name: sentinel-email-verification-db-tests
-    env_file: .env
-    environment:
-      - DATABASE_URL=postgresql://postgres:root@postgres:5432/sentinel?schema=public
-      - PORT=3000
-      - TEST_BASE_URL=http://sentinel-back:3000/api
-      - ADMIN_KEY=c228119cce0fe5a5737616104e0ae70b8b7fe37c5c4bed1748e1b83c533b34b5
-    depends_on:
-      sentinel-back:
-        condition: service_started
-    command: >
-      sh -c "sleep 15 && npm install @prisma/client && npx ts-node test/email-verification/test-email-verification-db.ts"
-    networks:
-      - sentinel-network
-
 volumes:
   pg_data:
 
