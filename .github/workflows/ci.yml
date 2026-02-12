@@ -62,8 +62,8 @@ jobs:
         env:
           DATABASE_URL: postgresql://postgres:root@localhost:5432/sentinel
       
-      - name: Run database migrations
-        run: npx prisma migrate deploy
+      - name: Push database schema
+        run: npx prisma db push
         env:
           DATABASE_URL: postgresql://postgres:root@localhost:5432/sentinel
       
