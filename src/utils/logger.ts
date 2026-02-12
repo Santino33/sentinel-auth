@@ -26,15 +26,17 @@ function writeLog(channel: LogChannel, entry: string) {
 }
 
 export const logger = {
-  info(channel: LogChannel, message: string) {
-    writeLog(channel, formatMessage("INFO", message));
+  info(channel: string, ...messages: string[]) {
+    writeLog(channel as LogChannel, formatMessage("INFO", messages.join(" | ")));
   },
 
-  warn(channel: LogChannel, message: string) {
-    writeLog(channel, formatMessage("WARN", message));
+  warn(channel: string, ...messages: string[]) {
+    writeLog(channel as LogChannel, formatMessage("WARN", messages.join(" | ")));
   },
 
-  error(channel: LogChannel, message: string) {
-    writeLog(channel, formatMessage("ERROR", message));
+  error(channel: string, ...messages: string[]) {
+    writeLog(channel as LogChannel, formatMessage("ERROR", messages.join(" | ")));
   },
 };
+
+export type Logger = typeof logger;
