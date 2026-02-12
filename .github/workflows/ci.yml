@@ -59,6 +59,8 @@ jobs:
       
       - name: Generate Prisma Client
         run: npx prisma generate
+        env:
+          DATABASE_URL: postgresql://postgres:root@localhost:5432/sentinel
       
       - name: Run database migrations
         run: npx prisma migrate deploy
@@ -96,6 +98,8 @@ jobs:
       
       - name: Generate Prisma Client
         run: npx prisma generate
+        env:
+          DATABASE_URL: postgresql://postgres:root@localhost:5432/sentinel
       
       - name: Build project
         run: npm run build
